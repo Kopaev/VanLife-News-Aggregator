@@ -50,8 +50,8 @@ try {
     exit(1);
 }
 
-$newsProcessor = new NewsProcessor($aiProvider, $logger, $articleRepository);
-$translationService = new TranslationService($aiProvider, $logger, $articleRepository, $translationRepository);
+$newsProcessor = new NewsProcessor($aiProvider, $logger, $articleRepository, $config);
+$translationService = new TranslationService($aiProvider, $logger, $articleRepository, $translationRepository, $config);
 $moderationService = new ModerationService($articleRepository, $logger);
 
 $relevanceBatch = (int)$config->get('processing.relevance_batch', 10);

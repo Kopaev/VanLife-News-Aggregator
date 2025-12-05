@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\AI\OpenAIProvider;
+use App\Core\Config;
 use App\Model\Translation;
 use App\Repository\ArticleRepository;
 use App\Repository\TranslationRepository;
@@ -28,12 +29,20 @@ class TranslationService
 - Описание: {summary}
 PROMPT;
 
+    private int $titleLimit;
+    private int $summaryLimit;
+    private int $maxTokens;
+
     public function __construct(
         private readonly OpenAIProvider $aiProvider,
         private readonly LoggerService $logger,
         private readonly ArticleRepository $articleRepository,
-        private readonly TranslationRepository $translationRepository
+        private readonly TranslationRepository $translationRepository,
+        private readonly Config $config
     ) {
+        $this->titleLimit = (int)$this->config->get('prompts.translation.title_limit', 400);
+        $this->summaryLimit = (int)$this->config->get('prompts.translation.summary_limit', 1200);
+        $this->maxTokens = (int)$this->config->get('prompts.translation.max_tokens', 300);
     }
 
     public function translatePending(int $limit = 10): int
@@ -60,8 +69,8 @@ PROMPT;
     {
         $payload = [
             '{language}' => (string)($article['original_language'] ?? 'unknown'),
-            '{title}' => $this->truncate((string)($article['original_title'] ?? ''), 400),
-            '{summary}' => $this->truncate((string)($article['original_summary'] ?? ''), 1200),
+            '{title}' => TextSanitizer::limit((string)($article['original_title'] ?? ''), $this->titleLimit),
+            '{summary}' => TextSanitizer::limit((string)($article['original_summary'] ?? ''), $this->summaryLimit),
         ];
 
         $response = $this->aiProvider->chat(
@@ -73,7 +82,7 @@ PROMPT;
             ],
             [
                 'response_format' => ['type' => 'json_object'],
-                'max_tokens' => 300,
+                'max_tokens' => $this->maxTokens,
             ]
         );
 
@@ -116,14 +125,5 @@ PROMPT;
             'title_ru' => $title,
             'summary_ru' => $summary === '' ? null : $summary,
         ];
-    }
-
-    private function truncate(string $text, int $maxLength): string
-    {
-        if (mb_strlen($text) <= $maxLength) {
-            return $text;
-        }
-
-        return mb_substr($text, 0, $maxLength);
     }
 }
