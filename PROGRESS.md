@@ -12,7 +12,7 @@
 | 1.1 | Project initialization | ✅ | 2025-12-05 | Structure, DB schema, configs |
 | 1.2 | Database (schema, migrations, cache) | ✅ | 2025-12-05 | Added migration runner and seeds loader |
 | 1.3 | Core classes (Router, Database, Config, Response) | ✅ | 2025-12-06 | Added App bootstrap, routing, health endpoint |
-| 1.4 | GoogleNewsUrlDecoder | ⬜ | - | - |
+| 1.4 | GoogleNewsUrlDecoder | ✅ | 2025-12-06 | Base64 + batchexecute decoder with DB cache |
 | 1.5 | NewsFetcher - RSS collection | ⬜ | - | - |
 | 1.6 | Basic models and repositories | ⬜ | - | - |
 | 1.7 | HomeController + home template | ⬜ | - | - |
@@ -174,11 +174,22 @@ vanlife-news/
 
 ---
 
+### [2025-12-06] - Task 1.4: GoogleNewsUrlDecoder
+
+**Completed:**
+- Реализован сервис `GoogleNewsUrlDecoder` с методами base64, Google batchexecute API и fallback через HTTP-редирект
+- Добавлено кеширование декодированных ссылок в таблице `decoded_urls_cache`
+- Реализован сервис логирования `LoggerService` с записью в `logs/app.log`
+
+**Notes:**
+- Между сетевыми запросами применяется задержка из конфигурации `rate_limit.google_news_delay_ms`
+
+---
+
 ## Known Issues
 *None at this time*
 
 ---
 
 ## Next Steps
-1. Task 1.4: GoogleNewsUrlDecoder implementation
-2. Task 1.5: NewsFetcher - RSS collection
+1. Task 1.5: NewsFetcher - RSS collection
