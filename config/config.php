@@ -104,6 +104,20 @@ return [
         'moderation_batch' => (int)env('PROCESS_MODERATION_BATCH', 20),
     ],
 
+    // Prompt limits to control token usage
+    'prompts' => [
+        'relevance' => [
+            'title_limit' => (int)env('PROMPT_RELEVANCE_TITLE_LIMIT', 240),
+            'summary_limit' => (int)env('PROMPT_RELEVANCE_SUMMARY_LIMIT', 1200),
+            'max_tokens' => (int)env('PROMPT_RELEVANCE_MAX_TOKENS', 300),
+        ],
+        'translation' => [
+            'title_limit' => (int)env('PROMPT_TRANSLATE_TITLE_LIMIT', 400),
+            'summary_limit' => (int)env('PROMPT_TRANSLATE_SUMMARY_LIMIT', 1200),
+            'max_tokens' => (int)env('PROMPT_TRANSLATE_MAX_TOKENS', 300),
+        ],
+    ],
+
     // Rate Limiting
     'rate_limit' => [
         'google_news_delay_ms' => (int)env('GOOGLE_NEWS_DELAY_MS', 1000),

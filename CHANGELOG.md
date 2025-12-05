@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ModerationService для постобработки контента: автопоиск ключевых слов для отклонения/ручной модерации, отметка `moderated_at` и логирование решений
 - Публичные шаблоны на русском: категория/страна, теги, статус статьи и перевод в карточках новостей
 - Cron-скрипт `scripts/process_news.php`, объединяющий AI-разметку, переводы и модерацию с конфигурируемыми батчами
+- Оптимизация токенов: `TextSanitizer`, лимиты промптов (`PROMPT_*`) и `max_tokens` для AI-сервисов
 - Исправлен cron сбора новостей: корректная инициализация `LoggerService` и зависимостей `GoogleNewsUrlDecoder`
 - Методы `execute` и `lastInsertId` в `Database` для корректной работы репозиториев
 - Migration runner `scripts/migrate.php` with seed loading option

@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\AI\OpenAIProvider;
+use App\Core\Config;
 use App\Repository\ArticleRepository;
 use DateTimeImmutable;
 use RuntimeException;
@@ -50,14 +51,21 @@ PROMPT;
 
     private array $moderationRules;
     private array $categories;
+    private int $titleLimit;
+    private int $summaryLimit;
+    private int $maxTokens;
 
     public function __construct(
         private readonly OpenAIProvider $aiProvider,
         private readonly LoggerService $logger,
-        private readonly ArticleRepository $articleRepository
+        private readonly ArticleRepository $articleRepository,
+        private readonly Config $config
     ) {
         $this->moderationRules = require dirname(__DIR__, 2) . '/config/moderation.php';
         $this->categories = require dirname(__DIR__, 2) . '/config/categories.php';
+        $this->titleLimit = (int)$this->config->get('prompts.relevance.title_limit', 240);
+        $this->summaryLimit = (int)$this->config->get('prompts.relevance.summary_limit', 1200);
+        $this->maxTokens = (int)$this->config->get('prompts.relevance.max_tokens', 300);
     }
 
     public function processRelevance(int $limit = 10): int
@@ -113,6 +121,7 @@ PROMPT;
             ],
             [
                 'response_format' => ['type' => 'json_object'],
+                'max_tokens' => $this->maxTokens,
             ]
         );
 
@@ -150,8 +159,8 @@ PROMPT;
     private function buildPromptPayload(array $article): array
     {
         return [
-            '{title}' => (string)($article['original_title'] ?? ''),
-            '{summary}' => (string)($article['original_summary'] ?? ''),
+            '{title}' => TextSanitizer::limit((string)($article['original_title'] ?? ''), $this->titleLimit),
+            '{summary}' => TextSanitizer::limit((string)($article['original_summary'] ?? ''), $this->summaryLimit),
             '{source}' => (string)($article['source_name'] ?? ''),
             '{language}' => (string)($article['original_language'] ?? 'unknown'),
         ];

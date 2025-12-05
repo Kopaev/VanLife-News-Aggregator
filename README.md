@@ -34,6 +34,7 @@
 - [x] ModerationService для дополнительной фильтрации опасного контента
 - [x] TranslationService для перевода статей на русский и сохранения в `articles`/`translations`
 - [x] Русские шаблоны: вывод перевода/саммари, категории, страны, теги и статус статьи
+- [x] Оптимизация токенов: очистка и обрезка промптов, лимиты `max_tokens` в AI-запросах
 
 ### В планах
 - [ ] Кластеризация (группировка) похожих новостей
@@ -138,6 +139,12 @@ server {
 | `OPENAI_MODEL` | Модель OpenAI | ❌ (по умолч. `gpt-4o-mini`) |
 | `OPENAI_MAX_TOKENS` | Лимит токенов на ответ | ❌ (по умолч. `1000`) |
 | `OPENAI_TEMPERATURE` | Температура выборки | ❌ (по умолч. `0.3`) |
+| `PROMPT_RELEVANCE_TITLE_LIMIT` | Максимум символов в заголовке для промпта релевантности | ❌ (по умолч. `240`) |
+| `PROMPT_RELEVANCE_SUMMARY_LIMIT` | Максимум символов в описании для промпта релевантности | ❌ (по умолч. `1200`) |
+| `PROMPT_RELEVANCE_MAX_TOKENS` | Лимит токенов ответа для AI-оценки релевантности | ❌ (по умолч. `300`) |
+| `PROMPT_TRANSLATE_TITLE_LIMIT` | Максимум символов в заголовке для промпта перевода | ❌ (по умолч. `400`) |
+| `PROMPT_TRANSLATE_SUMMARY_LIMIT` | Максимум символов в описании для промпта перевода | ❌ (по умолч. `1200`) |
+| `PROMPT_TRANSLATE_MAX_TOKENS` | Лимит токенов ответа для перевода | ❌ (по умолч. `300`) |
 | `OPENAI_REQUESTS_PER_MINUTE` | Ограничение RPS для OpenAI | ❌ (по умолч. `20`) |
 | `APP_URL` | URL сайта | ✅ |
 | `APP_DEBUG`| Режим отладки | ❌ (по умолч. `false`) |
@@ -203,7 +210,7 @@ echo $response->content;
 
 Пример использования в скрипте обработки:
 ```php
-$processor = new \App\Service\NewsProcessor($openAiProvider, $logger, $articleRepository);
+$processor = new \App\Service\NewsProcessor($openAiProvider, $logger, $articleRepository, $config);
 $processed = $processor->processRelevance(10); // обработать до 10 свежих статей
 
 echo "Processed: {$processed}";
@@ -235,11 +242,17 @@ echo "Moderated: {$moderated}";
 
 Пример использования:
 ```php
-$translator = new \App\Service\TranslationService($openAiProvider, $logger, $articleRepository, $translationRepository);
+$translator = new \App\Service\TranslationService($openAiProvider, $logger, $articleRepository, $translationRepository, $config);
 $done = $translator->translatePending(5); // перевести 5 статей без русской версии
 
 echo "Translated: {$done}";
 ```
+
+### Оптимизация расхода токенов
+
+- Заголовок и описание перед отправкой в OpenAI проходят через `TextSanitizer`, который убирает HTML, лишние пробелы и обрезает строки по заданным лимитам.
+- Лимиты промптов и `max_tokens` управляются переменными `.env` (`PROMPT_RELEVANCE_*`, `PROMPT_TRANSLATE_*`).
+- `NewsProcessor` и `TranslationService` передают явный `max_tokens`, чтобы ограничить размер ответа модели.
 
 ### Комплексный AI-пайплайн (cron)
 Запускается скриптом `scripts/process_news.php` и последовательно выполняет три этапа:
