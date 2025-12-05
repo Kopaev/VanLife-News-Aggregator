@@ -25,6 +25,7 @@
 ### Implemented
 - [x] Project structure initialized
 - [x] Database schema designed (12 tables)
+- [x] Migration runner with seed support
 - [x] Configuration system with .env support
 - [x] Google News RSS sources for 20+ languages
 - [x] Category system with keywords
@@ -78,7 +79,13 @@ mysql -u root -p -e "CREATE USER 'vanlife'@'localhost' IDENTIFIED BY 'your_passw
 mysql -u root -p -e "GRANT ALL PRIVILEGES ON vanlife_news.* TO 'vanlife'@'localhost';"
 ```
 
-### 5. Import schema and seed data
+### 5. Run migrations and seed data
+Recommended way (uses PHP CLI runner):
+```bash
+php scripts/migrate.php --seed
+```
+
+Manual import (fallback):
 ```bash
 mysql -u vanlife -p vanlife_news < sql/schema.sql
 mysql -u vanlife -p vanlife_news < sql/seeds/countries.sql
@@ -260,6 +267,18 @@ vanlife-news/
 | `admins` | Admin users |
 | `admin_sessions` | Admin sessions |
 | `settings` | Application settings |
+
+### Migrations & Seeds
+
+- Apply pending migrations:
+  ```bash
+  php scripts/migrate.php
+  ```
+- Apply migrations and load seed data for countries, languages, and categories:
+  ```bash
+  php scripts/migrate.php --seed
+  ```
+- Manual SQL files are located in `sql/schema.sql` and `sql/seeds/`.
 
 ---
 

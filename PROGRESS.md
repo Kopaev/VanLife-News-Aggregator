@@ -10,7 +10,7 @@
 | # | Task | Status | Date | Notes |
 |---|------|--------|------|-------|
 | 1.1 | Project initialization | ✅ | 2025-12-05 | Structure, DB schema, configs |
-| 1.2 | Database (schema, migrations, cache) | ⬜ | - | - |
+| 1.2 | Database (schema, migrations, cache) | ✅ | 2025-12-05 | Added migration runner and seeds loader |
 | 1.3 | Core classes (Router, Database, Config, Response) | ⬜ | - | - |
 | 1.4 | GoogleNewsUrlDecoder | ⬜ | - | - |
 | 1.5 | NewsFetcher - RSS collection | ⬜ | - | - |
@@ -148,6 +148,17 @@ vanlife-news/
 └── CHANGELOG.md
 ```
 
+### [2025-12-05] - Task 1.2: Database (schema, migrations, cache)
+
+**Completed:**
+- Добавлен файл миграции `sql/migrations/001_init_schema.sql` с полной схемой и кешем декодированных URL Google News
+- Добавлен CLI-скрипт `scripts/migrate.php` для применения миграций и загрузки сидов
+- Обновлена `sql/schema.sql` — теперь включает таблицу `migrations`
+- Обновлена документация по запуску миграций и сидов (README)
+
+**Notes:**
+- Сидовые данные (страны, языки, категории) загружаются с параметром `--seed`
+
 ---
 
 ## Known Issues
@@ -156,5 +167,5 @@ vanlife-news/
 ---
 
 ## Next Steps
-1. Task 1.2: Set up database and test schema
-2. Task 1.3: Implement Core classes (Router, Database, Config, Response)
+1. Task 1.3: Implement Core classes (Router, Database, Config, Response)
+2. Task 1.4: GoogleNewsUrlDecoder implementation
