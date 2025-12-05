@@ -1,6 +1,6 @@
 # VanLife News Aggregator - Progress
 
-**Last Updated:** 2025-12-05
+**Last Updated:** 2025-12-06
 
 ## Current Phase: PHASE 1 - Foundation
 
@@ -11,7 +11,7 @@
 |---|------|--------|------|-------|
 | 1.1 | Project initialization | ✅ | 2025-12-05 | Structure, DB schema, configs |
 | 1.2 | Database (schema, migrations, cache) | ✅ | 2025-12-05 | Added migration runner and seeds loader |
-| 1.3 | Core classes (Router, Database, Config, Response) | ⬜ | - | - |
+| 1.3 | Core classes (Router, Database, Config, Response) | ✅ | 2025-12-06 | Added App bootstrap, routing, health endpoint |
 | 1.4 | GoogleNewsUrlDecoder | ⬜ | - | - |
 | 1.5 | NewsFetcher - RSS collection | ⬜ | - | - |
 | 1.6 | Basic models and repositories | ⬜ | - | - |
@@ -161,11 +161,24 @@ vanlife-news/
 
 ---
 
+### [2025-12-06] - Task 1.3: Core classes
+
+**Completed:**
+- Реализованы базовые классы ядра: `Config`, `Database`, `Router`, `Response`, `App`
+- Обновлена точка входа `public/index.php` для использования роутера и ядра
+- Добавлен health-check endpoint `/health`
+
+**Notes:**
+- Роутер поддерживает плейсхолдеры `{id}` и автоматически нормализует ответы
+- Контекст (config, db) передаётся в хэндлеры для последующих контроллеров
+
+---
+
 ## Known Issues
 *None at this time*
 
 ---
 
 ## Next Steps
-1. Task 1.3: Implement Core classes (Router, Database, Config, Response)
-2. Task 1.4: GoogleNewsUrlDecoder implementation
+1. Task 1.4: GoogleNewsUrlDecoder implementation
+2. Task 1.5: NewsFetcher - RSS collection

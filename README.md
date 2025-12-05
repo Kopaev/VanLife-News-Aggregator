@@ -27,6 +27,7 @@
 - [x] Database schema designed (12 tables)
 - [x] Migration runner with seed support
 - [x] Configuration system with .env support
+- [x] Core framework classes (Config, Database, Router, Response, App bootstrap)
 - [x] Google News RSS sources for 20+ languages
 - [x] Category system with keywords
 - [x] Country and region configuration
@@ -190,9 +191,9 @@ php scripts/generate_sitemap.php
 | GET | `/api/news/{id}` | Single article |
 | GET | `/api/clusters` | News clusters |
 | GET | `/api/filters` | Filter data |
-| GET | `/health` | Health check |
+| GET | `/health` | Health check (online) |
 
-*API endpoints will be implemented in future phases.*
+`/health` возвращает статус приложения, имя окружения и unix timestamp. Остальные API endpoints будут реализованы в следующих фазах.
 
 ---
 
