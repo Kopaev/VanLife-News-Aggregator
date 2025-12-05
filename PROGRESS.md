@@ -2,7 +2,7 @@
 
 **Last Updated:** 2025-12-06
 
-## Current Phase: PHASE 3 - Clustering
+## Current Phase: PHASE 4 - Filters & Search
 
 ### Task Status
 
@@ -41,7 +41,7 @@
 | 3.3 | Main article selection | ✅ | 2025-12-06 | ClusterMainSelector: выбор главной статьи по релевантности, свежести и бонусам |
 | 3.4 | Cluster UI | ✅ | 2025-12-06 | Карточки кластеров на главной и странице списка |
 | 3.5 | Cluster page | ✅ | 2025-12-06 | Страница кластера с основным мета-блоком и новостями |
-| 3.6 | Clustering cron script | ⬜ | — | — |
+| 3.6 | Clustering cron script | ✅ | 2025-12-06 | Скрипт `cluster_news.php` для батчевой кластеризации |
 
 ... (rest of the phases remain the same)
 
@@ -89,6 +89,9 @@
 - Создана страница кластера с метаданными (страны, категория, даты) и лентой статей.
 - Новые маршруты `/clusters` и `/clusters/{slug}` подключены к контроллеру `ClusterController`.
 
+### [2025-12-06] - Task 3.6 Clustering cron
+- Добавлен скрипт `scripts/cluster_news.php` для запуска батчевой кластеризации по расписанию или вручную (опциональный лимит батча).
+
 ### [2025-12-05] - Task 1.1 - 1.4
 ... (previous entries)
 
@@ -100,5 +103,5 @@
 ---
 
 ## Next Steps
-1. Подготовить cron-скрипт кластеризации (PHASE 3.6).
-2. Подготовить фильтры и поиск (PHASE 4).
+1. Подготовить фильтры и поиск (PHASE 4).
+2. Реализовать публичные API-эндпоинты для новостей и кластеров (PHASE 5 по плану промпта).

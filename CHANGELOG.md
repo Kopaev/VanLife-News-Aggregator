@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ClusterManager/ClusterRepository для создания и обновления кластеров; новые параметры `.env` (`CLUSTER_BATCH_SIZE`, `CLUSTER_CANDIDATES_LIMIT`, `CLUSTER_ATTACH_LIMIT`)
 - ClusterMainSelector: автоматический выбор главной статьи кластера (учитывает релевантность, свежесть, перевод, изображение и просмотры) + новые параметры `.env` (`CLUSTER_MAIN_*`)
 - Публичный UI кластеров: карточки на главной, страницы `/clusters` и `/clusters/{slug}`, новые шаблоны и стили
+- Cron-скрипт `scripts/cluster_news.php` для батчевой кластеризации со флагом `CLUSTER_ENABLED` и опциональным лимитом статей
 - Методы `execute` и `lastInsertId` в `Database` для корректной работы репозиториев
 - Migration runner `scripts/migrate.php` with seed loading option
 - Initial SQL migration `sql/migrations/001_init_schema.sql` with full schema and decoded URL cache
