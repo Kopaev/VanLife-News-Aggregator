@@ -21,18 +21,18 @@ use App\Service\NewsFetcher;
 $config = Config::loadDefault(BASE_PATH);
 
 // Logger
-$logger = new LoggerService($config->get('app.logger.path'));
+$logger = new LoggerService($config);
 
 // Database
 try {
     $database = new Database($config);
 } catch (PDOException $e) {
-    $logger->critical('DB Connection', 'Failed to connect to the database in cron script.', ['error' => $e->getMessage()]);
+    $logger->error('DB Connection', 'Failed to connect to the database in cron script.', ['error' => $e->getMessage()]);
     exit(1);
 }
 
 // Services and Repositories
-$urlDecoder = new GoogleNewsUrlDecoder($logger);
+$urlDecoder = new GoogleNewsUrlDecoder($database, $logger, $config);
 $sourceRepository = new SourceRepository($database);
 $articleRepository = new ArticleRepository($database);
 $newsFetcher = new NewsFetcher($logger, $urlDecoder, $sourceRepository, $articleRepository);
