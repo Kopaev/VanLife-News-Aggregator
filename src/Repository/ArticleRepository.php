@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Core\Database;
 use App\Model\Article;
+use DateTimeImmutable;
 
 class ArticleRepository
 {
@@ -182,6 +183,54 @@ class ArticleRepository
                 $moderatedAt,
                 $articleId,
             ]
+        );
+    }
+
+    public function getArticlesForClustering(int $limit = 20): array
+    {
+        return $this->db->fetchAll(
+            'SELECT id, cluster_id, title_ru, original_title, summary_ru, original_summary, tags,
+                    category_slug, country_code, published_at, ai_relevance_score
+             FROM articles
+             WHERE cluster_id IS NULL
+               AND status IN ("published", "moderation")
+             ORDER BY published_at DESC
+             LIMIT ?',
+            [$limit]
+        );
+    }
+
+    public function getCandidatesForClustering(int $excludeArticleId, int $hoursWindow, int $limit = 100): array
+    {
+        $fromDate = (new DateTimeImmutable(sprintf('-%d hours', $hoursWindow)))->format('Y-m-d H:i:s');
+
+        return $this->db->fetchAll(
+            'SELECT id, cluster_id, title_ru, original_title, summary_ru, original_summary, tags,
+                    category_slug, country_code, published_at, ai_relevance_score
+             FROM articles
+             WHERE id <> ?
+               AND status IN ("published", "moderation")
+               AND published_at >= ?
+             ORDER BY published_at DESC
+             LIMIT ?',
+            [$excludeArticleId, $fromDate, $limit]
+        );
+    }
+
+    public function assignToCluster(array $articleIds, int $clusterId): void
+    {
+        $ids = array_values(array_unique(array_map('intval', $articleIds)));
+
+        if (empty($ids)) {
+            return;
+        }
+
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $params = array_merge([$clusterId], $ids);
+
+        $this->db->execute(
+            "UPDATE articles SET cluster_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id IN ({$placeholders})",
+            $params
         );
     }
 }
