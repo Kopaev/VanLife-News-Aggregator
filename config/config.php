@@ -97,6 +97,13 @@ return [
         'cluster_enabled' => env('CLUSTER_ENABLED', true),
     ],
 
+    // Processing limits
+    'processing' => [
+        'relevance_batch' => (int)env('PROCESS_RELEVANCE_BATCH', 10),
+        'translation_batch' => (int)env('PROCESS_TRANSLATION_BATCH', 10),
+        'moderation_batch' => (int)env('PROCESS_MODERATION_BATCH', 20),
+    ],
+
     // Rate Limiting
     'rate_limit' => [
         'google_news_delay_ms' => (int)env('GOOGLE_NEWS_DELAY_MS', 1000),
