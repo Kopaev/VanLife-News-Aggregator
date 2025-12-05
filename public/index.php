@@ -43,6 +43,7 @@ if (file_exists($autoloader)) {
     });
 }
 
+use App\Controller\ApiController;
 use App\Controller\ArticleController;
 use App\Controller\ClusterController;
 use App\Controller\HomeController;
@@ -64,16 +65,23 @@ $articleRepository = new ArticleRepository($database);
 $clusterRepository = new ClusterRepository($database);
 
 // --- Controllers ---
-$homeController = new HomeController($articleRepository, $clusterRepository);
+$homeController = new HomeController($articleRepository, $clusterRepository, $database);
 $articleController = new ArticleController($articleRepository);
 $clusterController = new ClusterController($clusterRepository, $articleRepository);
+$apiController = new ApiController($articleRepository, $clusterRepository, $database);
 
-
+// --- Public Routes ---
 $router->get('/', [$homeController, 'index']);
 $router->get('/news/{slug}', [$articleController, 'show']);
 $router->get('/clusters', [$clusterController, 'index']);
 $router->get('/clusters/{slug}', [$clusterController, 'show']);
 
+// --- API Routes ---
+$router->get('/api/filters', [$apiController, 'filters']);
+$router->get('/api/news', [$apiController, 'news']);
+$router->get('/api/clusters', [$apiController, 'clusters']);
+
+// --- System Routes ---
 $router->get('/health', function () use ($config): Response {
     return Response::json([
         'status' => 'ok',
