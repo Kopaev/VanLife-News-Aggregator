@@ -135,4 +135,7 @@ return [
         'enabled' => env('CACHE_ENABLED', true),
         'ttl' => (int)env('CACHE_TTL', 3600),
     ],
+
+    // Clustering & similarity scoring
+    'clustering' => require __DIR__ . '/clustering.php',
 ];

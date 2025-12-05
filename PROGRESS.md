@@ -2,7 +2,7 @@
 
 **Last Updated:** 2025-12-06
 
-## Current Phase: PHASE 2 - AI Processing
+## Current Phase: PHASE 3 - Clustering
 
 ### Task Status
 
@@ -32,6 +32,16 @@
 | 2.6 | Cron script for processing | ✅ | 2025-12-05 | `process_news.php` запускает разметку, перевод и модерацию батчами |
 | 2.7 | Template updates (Russian titles, categories) | ✅ | 2025-12-06 | Русифицированные шаблоны с категориями, странами, тегами и статусами |
 | 2.8 | Token usage optimization | ✅ | 2025-12-06 | Лимиты промптов, max_tokens и очистка текста перед запросами |
+
+#### PHASE 3: Clustering
+| # | Task | Status | Date | Notes |
+|---|------|--------|------|-------|
+| 3.1 | ClusteringService — similarity scoring | ✅ | 2025-12-06 | Jaccard по заголовку/саммари/тегам, бонусы за метаданные и временной декей |
+| 3.2 | Cluster creation/update algorithm | ⬜ | — | — |
+| 3.3 | Main article selection | ⬜ | — | — |
+| 3.4 | Cluster UI | ⬜ | — | — |
+| 3.5 | Cluster page | ⬜ | — | — |
+| 3.6 | Clustering cron script | ⬜ | — | — |
 
 ... (rest of the phases remain the same)
 
@@ -68,6 +78,9 @@
 ### [2025-12-06] - Task 2.7 Template updates
 - Обновлены публичные шаблоны: русский интерфейс, категории/страны, теги, статус статьи и вывод перевода.
 
+### [2025-12-06] - Task 3.1 ClusteringService
+- Добавлен сервис расчёта схожести статей (заголовки, саммари, теги, категория/страна, временной декей) с конфигурацией через `.env`.
+
 ### [2025-12-05] - Task 1.1 - 1.4
 ... (previous entries)
 
@@ -79,5 +92,5 @@
 ---
 
 ## Next Steps
-1. Добавить кластеризацию и визуализацию (PHASE 3).
+1. Реализовать алгоритм создания/обновления кластеров (PHASE 3.2+).
 2. Подготовить фильтры и поиск (PHASE 4).
