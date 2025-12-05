@@ -28,7 +28,7 @@
 | 2.2 | NewsProcessor - relevance scoring | ✅ | 2025-12-06 | Добавлен сервис релевантности с OpenAI и правилами модерации |
 | 2.3 | NewsProcessor - categorization and tags | ✅ | 2025-12-06 | Запись категории, страны и тегов из OpenAI-ответа |
 | 2.4 | TranslationService | ✅ | 2025-12-06 | Перевод на русский через OpenAI, запись в articles + translations |
-| 2.5 | ModerationService | ⬜ | - | - |
+| 2.5 | ModerationService | ✅ | 2025-12-06 | Ключевые слова для автоотклонения/ручной модерации, отметка moderated_at |
 | 2.6 | Cron script for processing | ⬜ | - | - |
 | 2.7 | Template updates (Russian titles, categories) | ⬜ | - | - |
 | 2.8 | Token usage optimization | ⬜ | - | - |
@@ -58,6 +58,9 @@
 ### [2025-12-06] - Task 2.4 TranslationService
 - Added `TranslationService` to translate processed articles into Russian via OpenAI, writing results into `articles` and `translations` tables with logging.
 
+### [2025-12-06] - Task 2.5 ModerationService
+- Added `ModerationService` to apply moderation rules after AI-разметки: автоотклонение по списку `auto_reject`, флаги модерации по `require_moderation`, возврат низкобалльных публикаций в статус `moderation` и отметка `moderated_at` с логированием.
+
 ### [2025-12-05] - Task 1.1 - 1.4
 ... (previous entries)
 
@@ -69,6 +72,6 @@
 ---
 
 ## Next Steps
-1. Создать ModerationService для дополнительной фильтрации (Task 2.5).
-2. Создать cron-скрипт для AI-пайплайна (Task 2.6) и обновить шаблоны (Task 2.7).
-3. Оптимизировать расход токенов и повторно проверить пайплайн (Task 2.8).
+1. Создать cron-скрипт для AI-пайплайна (Task 2.6) и подключить модерацию/переводы.
+2. Обновить шаблоны под русские заголовки, категории и статусы (Task 2.7).
+3. Оптимизировать расход токенов и пересмотреть пайплайн (Task 2.8).

@@ -78,6 +78,20 @@ class ArticleRepository
         );
     }
 
+    public function getArticlesForModeration(int $limit = 20): array
+    {
+        return $this->db->fetchAll(
+            'SELECT a.*, s.name AS source_name FROM articles a
+             LEFT JOIN sources s ON s.id = a.source_id
+             WHERE a.ai_processed_at IS NOT NULL
+               AND a.moderated_at IS NULL
+               AND a.status IN ("published", "moderation")
+             ORDER BY a.ai_processed_at DESC
+             LIMIT ?',
+            [$limit]
+        );
+    }
+
     public function updateProcessing(
         int $articleId,
         int $score,
@@ -117,6 +131,21 @@ class ArticleRepository
             [
                 $titleRu,
                 $summaryRu,
+                $articleId,
+            ]
+        );
+    }
+
+    public function updateModeration(int $articleId, string $status, ?string $reason, string $moderatedAt): void
+    {
+        $this->db->execute(
+            'UPDATE articles
+             SET status = ?, moderation_reason = ?, moderated_at = ?, updated_at = CURRENT_TIMESTAMP
+             WHERE id = ?',
+            [
+                $status,
+                $reason,
+                $moderatedAt,
                 $articleId,
             ]
         );

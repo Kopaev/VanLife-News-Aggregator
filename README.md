@@ -31,6 +31,7 @@
 - [x] Система миграций и сидов для БД
 - [x] OpenAI-провайдер для chat-completions с ограничением запросов
 - [x] NewsProcessor для AI-оценки релевантности, категорий/страны и тегов
+- [x] ModerationService для дополнительной фильтрации опасного контента
 - [x] TranslationService для перевода статей на русский и сохранения в `articles`/`translations`
 
 ### В планах
@@ -196,6 +197,22 @@ $processor = new \App\Service\NewsProcessor($openAiProvider, $logger, $articleRe
 $processed = $processor->processRelevance(10); // обработать до 10 свежих статей
 
 echo "Processed: {$processed}";
+```
+
+### ModerationService (фильтрация контента)
+`App\Service\ModerationService` применяет правила из `config/moderation.php`, чтобы пометить статьи с потенциально опасными ключевыми словами или автоматически отклонить их. Сервис обрабатывает материалы, прошедшие AI-разметку, и проставляет `moderated_at`, обновляя статус и причину модерации.
+
+Логика по умолчанию:
+- слова из `auto_reject` → статус `rejected` и причина `auto_reject_keyword`;
+- слова из `require_moderation` → статус `moderation` и причина `keyword_flag`;
+- публикации с низким баллом, но статусом `published` → возвращаются в `moderation` с причиной `below_threshold`.
+
+Пример использования:
+```php
+$moderationService = new \App\Service\ModerationService($articleRepository, $logger);
+$moderated = $moderationService->moderatePending(20); // прогнать 20 свежих статей
+
+echo "Moderated: {$moderated}";
 ```
 
 ### TranslationService (ИИ-перевод на русский)

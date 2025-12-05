@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - NewsProcessor для AI-оценки релевантности статей с учётом правил модерации
 - NewsProcessor сохраняет AI-определённые категорию (`category_slug`), страну и теги статьи
 - TranslationService для перевода статей на русский язык и записи в таблицы `articles` и `translations`
+- ModerationService для постобработки контента: автопоиск ключевых слов для отклонения/ручной модерации, отметка `moderated_at` и логирование решений
 - Методы `execute` и `lastInsertId` в `Database` для корректной работы репозиториев
 - Migration runner `scripts/migrate.php` with seed loading option
 - Initial SQL migration `sql/migrations/001_init_schema.sql` with full schema and decoded URL cache
