@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- AI слой: `App\AI\AIProviderInterface`, `OpenAIProvider` и `AIResponse` для работы с OpenAI Chat Completions с учётом лимита запросов
 - Migration runner `scripts/migrate.php` with seed loading option
 - Initial SQL migration `sql/migrations/001_init_schema.sql` with full schema and decoded URL cache
 - Core framework layer: `Config`, `Database`, `Router`, `Response`, `App`

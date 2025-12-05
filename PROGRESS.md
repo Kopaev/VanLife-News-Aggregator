@@ -24,7 +24,7 @@
 #### PHASE 2: AI Processing
 | # | Task | Status | Date | Notes |
 |---|------|--------|------|-------|
-| 2.1 | OpenAI Provider | ⬜ | - | - |
+| 2.1 | OpenAI Provider | ✅ | 2025-12-05 | Добавлен `OpenAIProvider` с оберткой ответа и ограничением запросов |
 | 2.2 | NewsProcessor - relevance scoring | ⬜ | - | - |
 | 2.3 | NewsProcessor - categorization and tags | ⬜ | - | - |
 | 2.4 | TranslationService | ⬜ | - | - |
@@ -66,6 +66,6 @@
 ---
 
 ## Next Steps
-1. Begin **PHASE 2: AI Processing**, starting with Task 2.1: OpenAI Provider.
-2. Implement AI-powered relevance scoring, categorization, and translation for articles.
-3. Create a cron script to handle the AI processing pipeline.
+1. Реализовать Task 2.2: NewsProcessor — модуль оценки релевантности на базе OpenAIProvider.
+2. Добавить категоризацию, теги и перевод новостей (Tasks 2.3–2.4).
+3. Создать cron-скрипт для AI-пайплайна (Task 2.6) и обновить шаблоны (Task 2.7).

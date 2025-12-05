@@ -29,6 +29,7 @@
 - [x] Переключатель светлой/тёмной темы
 - [x] Основные классы ядра (Роутер, Конфиг, БД)
 - [x] Система миграций и сидов для БД
+- [x] OpenAI-провайдер для chat-completions с ограничением запросов
 
 ### В планах
 - [ ] ИИ-перевод на русский (OpenAI)
@@ -131,7 +132,11 @@ server {
 | `DB_NAME` | Имя БД | ✅ |
 | `DB_USER` | Пользователь БД | ✅ |
 | `DB_PASS` | Пароль БД | ✅ |
-| `OPENAI_API_KEY` | API ключ OpenAI | ✅ (для будущих фаз) |
+| `OPENAI_API_KEY` | API ключ OpenAI | ✅ (для AI-функций) |
+| `OPENAI_MODEL` | Модель OpenAI | ❌ (по умолч. `gpt-4o-mini`) |
+| `OPENAI_MAX_TOKENS` | Лимит токенов на ответ | ❌ (по умолч. `1000`) |
+| `OPENAI_TEMPERATURE` | Температура выборки | ❌ (по умолч. `0.3`) |
+| `OPENAI_REQUESTS_PER_MINUTE` | Ограничение RPS для OpenAI | ❌ (по умолч. `20`) |
 | `APP_URL` | URL сайта | ✅ |
 | `APP_DEBUG`| Режим отладки | ❌ (по умолч. `false`) |
 | `LOG_LEVEL`| Уровень логирования | ❌ (по умолч. `info`) |
@@ -155,6 +160,20 @@ server {
 
 ### Google News URL Decoder
 Сервис `GoogleNewsUrlDecoder` используется внутри `NewsFetcher` для автоматического преобразования ссылок Google News в оригинальные URL статей. Он не требует ручного вмешательства.
+
+### OpenAI Provider
+Класс `App\AI\OpenAIProvider` реализует интерфейс `AIProviderInterface` и предоставляет удобный метод `chat()` для работы с OpenAI Chat Completions. Настройки берутся из `config/config.php` и учитывают ограничение запросов в минуту.
+
+Пример использования:
+```php
+$provider = new \App\AI\OpenAIProvider($config, $logger);
+$response = $provider->chat([
+    ['role' => 'system', 'content' => 'Ты — ассистент для vanlife новостей'],
+    ['role' => 'user', 'content' => 'Сформулируй заголовок для статьи'],
+]);
+
+echo $response->content;
+```
 
 ---
 
@@ -190,6 +209,7 @@ vanlife-news/
 ├── public/          # Document root (точка входа)
 ├── src/             # Исходный код приложения
 │   ├── Core/        # Ядро фреймворка
+│   ├── AI/          # Провайдеры ИИ и вспомогательные классы
 │   ├── Controller/  # Контроллеры
 │   ├── Service/     # Сервисы (бизнес-логика)
 │   ├── Model/       # Модели данных
@@ -222,7 +242,7 @@ php scripts/migrate.php
 Подробный трекер задач находится в файле [PROGRESS.md](PROGRESS.md).
 
 ### Текущая фаза
-**PHASE 1: Foundation** — завершение базового функционала.
+**PHASE 2: AI Processing** — интеграция ИИ-обработки новостей.
 
 ### Участие в разработке
 1. Изучите `PROGRESS.md`, чтобы определить текущую задачу.
