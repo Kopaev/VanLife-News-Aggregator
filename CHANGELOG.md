@@ -12,9 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial SQL migration `sql/migrations/001_init_schema.sql` with full schema and decoded URL cache
 - Core framework layer: `Config`, `Database`, `Router`, `Response`, `App`
 - Entry point wired to router with landing page and `/health` endpoint
-
-### In Progress
-- PHASE 1: Foundation - GoogleNewsUrlDecoder
+- GoogleNewsUrlDecoder service with base64/API/redirect strategies and DB caching
+- LoggerService with JSON log output to `logs/app.log`
 
 ---
 

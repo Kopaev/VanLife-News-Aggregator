@@ -32,10 +32,10 @@
 - [x] Category system with keywords
 - [x] Country and region configuration
 - [x] Moderation rules configuration
+- [x] Google News URL decoder with caching and rate limiting
 
 ### Planned
 - [ ] News collection from Google News RSS
-- [ ] Google News URL decoding
 - [ ] AI translation to Russian (OpenAI)
 - [ ] Automatic categorization
 - [ ] Similar news clustering
@@ -149,6 +149,8 @@ server {
 | `OPENAI_MODEL` | Model to use | No (default: gpt-4o-mini) |
 | `APP_URL` | Site URL | Yes |
 | `APP_DEBUG` | Debug mode | No (default: false) |
+| `LOG_LEVEL` | Log verbosity (`debug`, `info`, `warning`, `error`) | No (default: info) |
+| `GOOGLE_NEWS_DELAY_MS` | Delay between Google News decode requests (ms) | No (default: 1000) |
 | `ADMIN_USERNAME` | Admin username | Yes |
 | `ADMIN_PASSWORD` | Admin password | Yes |
 
@@ -179,6 +181,29 @@ php scripts/cluster_news.php
 
 # Generate sitemap
 php scripts/generate_sitemap.php
+```
+
+### Google News URL Decoder
+
+- Использует три стратегии: base64-декодирование, запрос к batchexecute API Google и fallback через HTTP-редирект.
+- Результаты кешируются в таблице `decoded_urls_cache` вместе с методом декодирования и временем последней попытки.
+- Между сетевыми запросами применяется задержка `GOOGLE_NEWS_DELAY_MS` (по умолчанию 1000 мс).
+- Логи пишутся в `logs/app.log` с уровнем, задаваемым переменной `LOG_LEVEL`.
+
+Пример прямого использования сервиса:
+
+```php
+use App\Core\Config;
+use App\Core\Database;
+use App\Service\GoogleNewsUrlDecoder;
+use App\Service\LoggerService;
+
+$config = Config::loadDefault(BASE_PATH);
+$logger = new LoggerService($config);
+$database = new Database($config);
+$decoder = new GoogleNewsUrlDecoder($database, $logger, $config);
+
+$decodedUrl = $decoder->decode('https://news.google.com/rss/articles/CBMi...');
 ```
 
 ---
