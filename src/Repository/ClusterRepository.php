@@ -104,6 +104,147 @@ class ClusterRepository
         );
     }
 
+    public function getLatestClusters(int $limit = 12): array
+    {
+        $clusters = $this->db->fetchAll(
+            'SELECT c.*,
+                    cat.name_ru AS category_name,
+                    cat.icon AS category_icon,
+                    cat.color AS category_color,
+                    ma.slug AS main_article_slug,
+                    ma.status AS main_article_status,
+                    COALESCE(ma.title_ru, ma.original_title) AS main_display_title,
+                    COALESCE(ma.summary_ru, ma.original_summary) AS main_display_summary,
+                    ma.image_url AS main_image_url
+             FROM clusters c
+             LEFT JOIN categories cat ON cat.slug = c.category_slug
+             LEFT JOIN articles ma ON ma.id = c.main_article_id
+             WHERE c.is_active = 1
+             ORDER BY c.last_updated_at DESC
+             LIMIT ?',
+            [$limit]
+        );
+
+        return $this->hydrateCountries($clusters);
+    }
+
+    public function findBySlug(string $slug): ?array
+    {
+        $cluster = $this->db->fetch(
+            'SELECT c.*,
+                    cat.name_ru AS category_name,
+                    cat.icon AS category_icon,
+                    cat.color AS category_color,
+                    ma.slug AS main_article_slug,
+                    ma.status AS main_article_status,
+                    COALESCE(ma.title_ru, ma.original_title) AS main_display_title,
+                    COALESCE(ma.summary_ru, ma.original_summary) AS main_display_summary,
+                    ma.image_url AS main_image_url
+             FROM clusters c
+             LEFT JOIN categories cat ON cat.slug = c.category_slug
+             LEFT JOIN articles ma ON ma.id = c.main_article_id
+             WHERE c.slug = ?
+               AND c.is_active = 1
+             LIMIT 1',
+            [$slug]
+        );
+
+        if ($cluster === null) {
+            return null;
+        }
+
+        $hydrated = $this->hydrateCountries([$cluster]);
+
+        return $hydrated[0] ?? $cluster;
+    }
+
+    private function hydrateCountries(array $clusters): array
+    {
+        if (empty($clusters)) {
+            return $clusters;
+        }
+
+        $allCodes = [];
+
+        foreach ($clusters as &$cluster) {
+            $cluster['country_codes'] = $this->decodeCountries($cluster['countries'] ?? null);
+
+            foreach ($cluster['country_codes'] as $code) {
+                if (!in_array($code, $allCodes, true)) {
+                    $allCodes[] = $code;
+                }
+            }
+
+            if (empty($cluster['main_display_title'])) {
+                $cluster['main_display_title'] = $cluster['title_ru'];
+            }
+
+            if (empty($cluster['main_display_summary'])) {
+                $cluster['main_display_summary'] = $cluster['summary_ru'] ?? null;
+            }
+        }
+        unset($cluster);
+
+        if (empty($allCodes)) {
+            return $clusters;
+        }
+
+        $countryMap = $this->loadCountriesMap($allCodes);
+
+        foreach ($clusters as &$cluster) {
+            $cluster['countries_meta'] = array_values(array_filter(
+                array_map(
+                    static fn(string $code) => $countryMap[$code] ?? null,
+                    $cluster['country_codes']
+                )
+            ));
+        }
+        unset($cluster);
+
+        return $clusters;
+    }
+
+    private function decodeCountries(mixed $value): array
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+
+            if (is_array($decoded)) {
+                return array_values(array_filter(array_map('strtoupper', $decoded)));
+            }
+        }
+
+        if (is_array($value)) {
+            return array_values(array_filter(array_map('strtoupper', $value)));
+        }
+
+        return [];
+    }
+
+    private function loadCountriesMap(array $codes): array
+    {
+        $codes = array_values(array_unique(array_filter($codes)));
+
+        if (empty($codes)) {
+            return [];
+        }
+
+        $placeholders = implode(',', array_fill(0, count($codes), '?'));
+        $rows = $this->db->fetchAll(
+            "SELECT code, name_ru, flag_emoji FROM countries WHERE code IN ({$placeholders})",
+            $codes
+        );
+
+        $map = [];
+        foreach ($rows as $row) {
+            if (!empty($row['code'])) {
+                $map[strtoupper($row['code'])] = $row;
+            }
+        }
+
+        return $map;
+    }
+
     private function resolveTitle(array $article): string
     {
         $title = $article['title_ru'] ?? $article['original_title'] ?? '';
