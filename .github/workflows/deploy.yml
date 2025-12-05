@@ -1,0 +1,28 @@
+name: Deploy VanLife News
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to production via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: 167.86.110.190
+          username: vanlife
+          key: ${{ secrets.NEWS_DEPLOY_SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/vanlife/VanLife-News-Aggregator
+            git pull origin main
+            composer install --no-dev --optimize-autoloader
+            php scripts/migrate.php
+            echo "Deploy finished"
