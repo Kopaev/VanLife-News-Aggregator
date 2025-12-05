@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Migration runner `scripts/migrate.php` with seed loading option
+- Initial SQL migration `sql/migrations/001_init_schema.sql` with full schema and decoded URL cache
+
 ### In Progress
 - PHASE 1: Foundation - Core classes implementation
 
