@@ -220,12 +220,20 @@ class ArticleRepository
     public function getClusterArticles(int $clusterId): array
     {
         return $this->db->fetchAll(
-            'SELECT id, title_ru, original_title, summary_ru, original_summary, image_url, views_count,
-                    status, published_at, ai_relevance_score
-             FROM articles
-             WHERE cluster_id = ?
-               AND status IN ("published", "moderation")
-             ORDER BY published_at DESC',
+            'SELECT a.*, 
+                    COALESCE(a.title_ru, a.original_title) AS display_title,
+                    COALESCE(a.summary_ru, a.original_summary) AS display_summary,
+                    c.name_ru AS category_name,
+                    c.icon AS category_icon,
+                    c.color AS category_color,
+                    country.name_ru AS country_name,
+                    country.flag_emoji AS country_flag
+             FROM articles a
+             LEFT JOIN categories c ON c.slug = a.category_slug
+             LEFT JOIN countries country ON country.code = a.country_code
+             WHERE a.cluster_id = ?
+               AND a.status IN ("published", "moderation")
+             ORDER BY a.published_at DESC',
             [$clusterId]
         );
     }

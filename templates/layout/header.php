@@ -10,7 +10,13 @@
     <header>
         <div class="container header-inner">
             <a href="/" class="logo">VanLife News</a>
-            <p class="header-subtitle">Русскоязычный дайджест мира vanlife</p>
+            <div class="header-actions">
+                <p class="header-subtitle">Русскоязычный дайджест мира vanlife</p>
+                <nav class="header-nav">
+                    <a href="/" class="link">Новости</a>
+                    <a href="/clusters" class="link">Кластеры</a>
+                </nav>
+            </div>
         </div>
     </header>
     <main>

@@ -31,76 +31,53 @@ $statusMap = [
 ?>
 
 <div class="container">
-    <h1>Свежие новости</h1>
-    <p class="page-lead">Переведённые и отсортированные материалы о vanlife: категории, страны, релевантность и теги от AI.</p>
-
-    <section class="cluster-section">
-        <div class="section-header">
-            <div>
-                <p class="eyebrow">Кластеры тем</p>
-                <h2 class="section-title">Подборки похожих новостей</h2>
-                <p class="section-lead">AI-группировка связанных публикаций: страны, категории и главная статья в одном блоке.</p>
+    <div class="cluster-hero">
+        <div class="cluster-meta-top">
+            <?php if (!empty($cluster['category_name'])): ?>
+                <span class="badge category-badge" <?php if (!empty($cluster['category_color'])): ?>style="background-color: <?php echo htmlspecialchars($cluster['category_color']); ?>"<?php endif; ?>>
+                    <?php echo htmlspecialchars(trim(($cluster['category_icon'] ?? '') . ' ' . $cluster['category_name'])); ?>
+                </span>
+            <?php endif; ?>
+            <div class="pill-group">
+                <?php foreach ($cluster['countries_meta'] ?? [] as $country): ?>
+                    <span class="pill"><?php echo htmlspecialchars(trim(($country['flag_emoji'] ?? '') . ' ' . ($country['name_ru'] ?? $country['code'] ?? ''))); ?></span>
+                <?php endforeach; ?>
+                <span class="pill pill-muted"><?php echo (int)($cluster['articles_count'] ?? 0); ?> статей</span>
             </div>
-            <a class="button" href="/clusters">Смотреть все кластеры</a>
         </div>
 
-        <?php if (!empty($clusters)): ?>
-            <div class="clusters-grid">
-                <?php foreach ($clusters as $cluster): ?>
-                    <?php
-                    $countries = $cluster['countries_meta'] ?? [];
-                    $categoryName = $cluster['category_name'] ?? null;
-                    $articleCount = (int)($cluster['articles_count'] ?? 0);
-                    ?>
-                    <article class="cluster-card">
-                        <div class="cluster-meta-top">
-                            <?php if (!empty($categoryName)): ?>
-                                <span class="badge category-badge" <?php if (!empty($cluster['category_color'])): ?>style="background-color: <?php echo htmlspecialchars($cluster['category_color']); ?>"<?php endif; ?>>
-                                    <?php echo htmlspecialchars(trim(($cluster['category_icon'] ?? '') . ' ' . $categoryName)); ?>
-                                </span>
-                            <?php endif; ?>
-                            <div class="pill-group">
-                                <?php foreach ($countries as $country): ?>
-                                    <span class="pill"><?php echo htmlspecialchars(trim(($country['flag_emoji'] ?? '') . ' ' . ($country['name_ru'] ?? $country['code'] ?? ''))); ?></span>
-                                <?php endforeach; ?>
-                                <span class="pill pill-muted"><?php echo $articleCount; ?> статей</span>
-                            </div>
-                        </div>
-
-                        <a href="/clusters/<?php echo htmlspecialchars($cluster['slug']); ?>" class="cluster-title">
-                            <?php echo htmlspecialchars($cluster['title_ru']); ?>
-                        </a>
-
-                        <?php if (!empty($cluster['main_display_summary'])): ?>
-                            <p class="cluster-summary"><?php echo htmlspecialchars($cluster['main_display_summary']); ?></p>
-                        <?php endif; ?>
-
-                        <div class="cluster-footer">
-                            <div>
-                                <p class="meta-label">Обновлено</p>
-                                <p class="meta-value"><?php echo htmlspecialchars($formatDate($cluster['last_updated_at'] ?? null)); ?></p>
-                            </div>
-                            <?php if (!empty($cluster['main_article_slug'])): ?>
-                                <a class="text-link" href="/news/<?php echo htmlspecialchars($cluster['main_article_slug']); ?>">Главная статья →</a>
-                            <?php endif; ?>
-                        </div>
-                    </article>
-                <?php endforeach; ?>
-            </div>
-        <?php else: ?>
-            <p class="muted">Кластеры появятся после первой кластеризации.</p>
+        <h1><?php echo htmlspecialchars($cluster['title_ru']); ?></h1>
+        <?php if (!empty($cluster['summary_ru'])): ?>
+            <p class="cluster-summary"><?php echo htmlspecialchars($cluster['summary_ru']); ?></p>
         <?php endif; ?>
-    </section>
 
-    <div class="articles">
+        <div class="cluster-meta-line">
+            <div>
+                <span class="meta-label">Первый источник</span>
+                <span class="meta-value"><?php echo htmlspecialchars($formatDate($cluster['first_published_at'] ?? null)); ?></span>
+            </div>
+            <div>
+                <span class="meta-label">Обновлён</span>
+                <span class="meta-value"><?php echo htmlspecialchars($formatDate($cluster['last_updated_at'] ?? null)); ?></span>
+            </div>
+            <?php if (!empty($cluster['main_article_slug'])): ?>
+                <div>
+                    <span class="meta-label">Главная статья</span>
+                    <a class="text-link" href="/news/<?php echo htmlspecialchars($cluster['main_article_slug']); ?>">Открыть →</a>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <section class="articles">
         <?php if (empty($articles)): ?>
-            <p>Пока нет опубликованных новостей.</p>
+            <p>Нет опубликованных материалов в этом кластере.</p>
         <?php else: ?>
             <?php foreach ($articles as $article): ?>
                 <?php
                 $tags = $decodeTags($article['tags'] ?? null);
                 $status = $statusMap[$article['status'] ?? 'new'] ?? ['label' => 'Статус неизвестен', 'class' => 'status--new'];
-                $language = strtoupper((string)($article['original_language'] ?? '')); 
+                $language = strtoupper((string)($article['original_language'] ?? ''));
                 ?>
                 <div class="article-card">
                     <div class="article-meta-top">
@@ -122,7 +99,7 @@ $statusMap = [
                         </div>
                     </div>
 
-                    <h2><?php echo htmlspecialchars($article['display_title'] ?? $article['original_title']); ?></h2>
+                    <h2><a href="/news/<?php echo htmlspecialchars($article['slug']); ?>"><?php echo htmlspecialchars($article['display_title'] ?? $article['original_title']); ?></a></h2>
 
                     <p class="article-summary">
                         <?php echo htmlspecialchars($article['display_summary'] ?? 'Описание появится после обработки.'); ?>
@@ -159,7 +136,7 @@ $statusMap = [
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
-    </div>
+    </section>
 </div>
 
 <?php require_once __DIR__ . '/../layout/footer.php'; ?>

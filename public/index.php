@@ -44,6 +44,7 @@ if (file_exists($autoloader)) {
 }
 
 use App\Controller\ArticleController;
+use App\Controller\ClusterController;
 use App\Controller\HomeController;
 use App\Core\App;
 use App\Core\Config;
@@ -51,6 +52,7 @@ use App\Core\Database;
 use App\Core\Response;
 use App\Core\Router;
 use App\Repository\ArticleRepository;
+use App\Repository\ClusterRepository;
 
 $config = Config::loadDefault(BASE_PATH);
 $router = new Router();
@@ -59,14 +61,18 @@ $app = new App($config, $router, $database);
 
 // --- Repositories ---
 $articleRepository = new ArticleRepository($database);
+$clusterRepository = new ClusterRepository($database);
 
 // --- Controllers ---
-$homeController = new HomeController($articleRepository);
+$homeController = new HomeController($articleRepository, $clusterRepository);
 $articleController = new ArticleController($articleRepository);
+$clusterController = new ClusterController($clusterRepository, $articleRepository);
 
 
 $router->get('/', [$homeController, 'index']);
 $router->get('/news/{slug}', [$articleController, 'show']);
+$router->get('/clusters', [$clusterController, 'index']);
+$router->get('/clusters/{slug}', [$clusterController, 'show']);
 
 $router->get('/health', function () use ($config): Response {
     return Response::json([
