@@ -63,6 +63,21 @@ class ArticleRepository
         );
     }
 
+    public function getArticlesForTranslation(int $limit = 10): array
+    {
+        return $this->db->fetchAll(
+            'SELECT a.* FROM articles a
+             LEFT JOIN translations t ON t.article_id = a.id AND t.target_language = "ru"
+             WHERE a.original_language <> "ru"
+               AND a.ai_processed_at IS NOT NULL
+               AND (a.title_ru IS NULL OR a.summary_ru IS NULL OR t.id IS NULL)
+               AND a.status IN ("published", "moderation")
+             ORDER BY a.ai_processed_at DESC, a.published_at DESC
+             LIMIT ?',
+            [$limit]
+        );
+    }
+
     public function updateProcessing(
         int $articleId,
         int $score,
@@ -88,6 +103,20 @@ class ArticleRepository
                 $categorySlug,
                 $countryCode,
                 $tagsJson,
+                $articleId,
+            ]
+        );
+    }
+
+    public function updateTranslation(int $articleId, string $titleRu, ?string $summaryRu): void
+    {
+        $this->db->execute(
+            'UPDATE articles
+             SET title_ru = ?, summary_ru = ?, updated_at = CURRENT_TIMESTAMP
+             WHERE id = ?',
+            [
+                $titleRu,
+                $summaryRu,
                 $articleId,
             ]
         );

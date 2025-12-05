@@ -27,7 +27,7 @@
 | 2.1 | OpenAI Provider | ✅ | 2025-12-05 | Добавлен `OpenAIProvider` с оберткой ответа и ограничением запросов |
 | 2.2 | NewsProcessor - relevance scoring | ✅ | 2025-12-06 | Добавлен сервис релевантности с OpenAI и правилами модерации |
 | 2.3 | NewsProcessor - categorization and tags | ✅ | 2025-12-06 | Запись категории, страны и тегов из OpenAI-ответа |
-| 2.4 | TranslationService | ⬜ | - | - |
+| 2.4 | TranslationService | ✅ | 2025-12-06 | Перевод на русский через OpenAI, запись в articles + translations |
 | 2.5 | ModerationService | ⬜ | - | - |
 | 2.6 | Cron script for processing | ⬜ | - | - |
 | 2.7 | Template updates (Russian titles, categories) | ⬜ | - | - |
@@ -55,6 +55,9 @@
 - **Cron Script (Task 1.10):** Created a standalone `scripts/fetch_news.php` script for automating news collection via cron jobs.
 - **Documentation (Task 1.11):** Thoroughly updated the `README.md` file with complete installation, configuration, and deployment instructions.
 
+### [2025-12-06] - Task 2.4 TranslationService
+- Added `TranslationService` to translate processed articles into Russian via OpenAI, writing results into `articles` and `translations` tables with logging.
+
 ### [2025-12-05] - Task 1.1 - 1.4
 ... (previous entries)
 
@@ -66,6 +69,6 @@
 ---
 
 ## Next Steps
-1. Добавить перевод новостей на русский язык (Task 2.4).
-2. Создать ModerationService для дополнительной фильтрации (Task 2.5).
-3. Создать cron-скрипт для AI-пайплайна (Task 2.6) и обновить шаблоны (Task 2.7).
+1. Создать ModerationService для дополнительной фильтрации (Task 2.5).
+2. Создать cron-скрипт для AI-пайплайна (Task 2.6) и обновить шаблоны (Task 2.7).
+3. Оптимизировать расход токенов и повторно проверить пайплайн (Task 2.8).
