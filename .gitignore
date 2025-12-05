@@ -1,0 +1,65 @@
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Composer
+/vendor/
+composer.lock
+
+# Logs
+/logs/*
+!logs/.gitkeep
+*.log
+
+# Cache
+/cache/*
+!cache/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build
+/node_modules/
+/dist/
+/build/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# PHP specific
+/php_errors.log
+/.php_cs.cache
+/.phpunit.result.cache
+/phpunit.xml
+.php-cs-fixer.cache
+
+# Uploads (if any)
+/public/uploads/*
+!public/uploads/.gitkeep
+
+# Session files
+/sessions/*
+!sessions/.gitkeep
+
+# Generated files
+/public/sitemap.xml
+/public/robots.txt
