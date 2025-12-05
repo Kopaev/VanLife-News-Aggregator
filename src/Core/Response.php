@@ -54,6 +54,13 @@ class Response
         return new self($text, $status, $headers);
     }
 
+    public static function xml(string $xml, int $status = 200, array $headers = []): self
+    {
+        $headers = array_merge(['Content-Type' => 'application/xml; charset=utf-8'], $headers);
+
+        return new self($xml, $status, $headers);
+    }
+
     public static function redirect(string $location, int $status = 302): self
     {
         return new self('', $status, ['Location' => $location]);

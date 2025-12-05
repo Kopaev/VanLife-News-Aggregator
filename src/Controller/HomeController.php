@@ -6,12 +6,14 @@ use App\Core\Database;
 use App\Core\Response;
 use App\Repository\ArticleRepository;
 use App\Repository\ClusterRepository;
+use App\Service\SeoService;
 
 class HomeController
 {
     private ArticleRepository $articleRepository;
     private ClusterRepository $clusterRepository;
     private Database $database;
+    private SeoService $seoService;
 
     public function __construct(
         ArticleRepository $articleRepository,
@@ -21,6 +23,7 @@ class HomeController
         $this->articleRepository = $articleRepository;
         $this->clusterRepository = $clusterRepository;
         $this->database = $database;
+        $this->seoService = new SeoService();
     }
 
     public function index(): Response
@@ -28,6 +31,9 @@ class HomeController
         $articles = $this->articleRepository->getLatestArticles();
         $clusters = $this->clusterRepository->getLatestClusters(8);
         $filtersData = $this->getFiltersData();
+
+        // Configure SEO for home page
+        $this->seoService->configureForHome();
 
         return Response::view('pages/home', [
             'articles' => $articles,
@@ -41,6 +47,8 @@ class HomeController
                 'language' => $_GET['language'] ?? null,
                 'period' => $_GET['period'] ?? null,
             ],
+            'seoService' => $this->seoService,
+            'seo' => $this->seoService->getData(),
         ]);
     }
 

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Core\Database;
+use App\Helper\SlugHelper;
 use App\Model\Article;
 use DateTimeImmutable;
 
@@ -201,13 +202,17 @@ class ArticleRepository
 
     public function updateTranslation(int $articleId, string $titleRu, ?string $summaryRu): void
     {
+        // Generate unique slug from Russian title
+        $slug = $this->generateUniqueSlug($articleId, $titleRu);
+
         $this->db->execute(
             'UPDATE articles
-             SET title_ru = ?, summary_ru = ?, updated_at = CURRENT_TIMESTAMP
+             SET title_ru = ?, summary_ru = ?, slug = ?, updated_at = CURRENT_TIMESTAMP
              WHERE id = ?',
             [
                 $titleRu,
                 $summaryRu,
+                $slug,
                 $articleId,
             ]
         );
@@ -403,5 +408,130 @@ class ArticleRepository
             'year' => 'a.published_at >= DATE_SUB(NOW(), INTERVAL 365 DAY)',
             default => null,
         };
+    }
+
+    /**
+     * Generate a unique slug for an article
+     *
+     * Uses article ID prefix to guarantee uniqueness (format: {id}-{slug})
+     *
+     * @param int $articleId Article ID
+     * @param string $title Article title (preferably Russian translation)
+     * @return string Unique slug
+     */
+    public function generateUniqueSlug(int $articleId, string $title): string
+    {
+        // Use ID-prefixed slug for guaranteed uniqueness
+        $slug = SlugHelper::generateWithId($articleId, $title);
+
+        // Double-check uniqueness (shouldn't happen with ID prefix, but safety first)
+        $counter = 1;
+        $baseSlug = $slug;
+        while ($this->slugExists($slug, $articleId)) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Check if a slug already exists (excluding given article ID)
+     *
+     * @param string $slug Slug to check
+     * @param int|null $excludeArticleId Article ID to exclude from check
+     * @return bool True if slug exists
+     */
+    public function slugExists(string $slug, ?int $excludeArticleId = null): bool
+    {
+        if ($excludeArticleId !== null) {
+            $row = $this->db->fetch(
+                'SELECT id FROM articles WHERE slug = ? AND id != ? LIMIT 1',
+                [$slug, $excludeArticleId]
+            );
+        } else {
+            $row = $this->db->fetch(
+                'SELECT id FROM articles WHERE slug = ? LIMIT 1',
+                [$slug]
+            );
+        }
+
+        return $row !== null;
+    }
+
+    /**
+     * Update article slug
+     *
+     * @param int $articleId Article ID
+     * @param string $slug New slug
+     */
+    public function updateSlug(int $articleId, string $slug): void
+    {
+        $this->db->execute(
+            'UPDATE articles SET slug = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            [$slug, $articleId]
+        );
+    }
+
+    /**
+     * Find article by ID
+     *
+     * @param int $articleId Article ID
+     * @return array|null Article data or null
+     */
+    public function findById(int $articleId): ?array
+    {
+        return $this->db->fetch(
+            'SELECT a.*,
+                    COALESCE(a.title_ru, a.original_title) AS display_title,
+                    COALESCE(a.summary_ru, a.original_summary) AS display_summary,
+                    c.name_ru AS category_name,
+                    c.icon AS category_icon,
+                    c.color AS category_color,
+                    country.name_ru AS country_name,
+                    country.flag_emoji AS country_flag,
+                    s.name AS source_name
+             FROM articles a
+             LEFT JOIN categories c ON c.slug = a.category_slug
+             LEFT JOIN countries country ON country.code = a.country_code
+             LEFT JOIN sources s ON s.id = a.source_id
+             WHERE a.id = ?',
+            [$articleId]
+        );
+    }
+
+    /**
+     * Get articles without slugs for migration
+     *
+     * @param int $limit Maximum number of articles to return
+     * @return array Articles without slugs
+     */
+    public function getArticlesWithoutSlugs(int $limit = 100): array
+    {
+        return $this->db->fetchAll(
+            'SELECT id, title_ru, original_title
+             FROM articles
+             WHERE slug IS NULL OR slug = ""
+             ORDER BY published_at DESC
+             LIMIT ?',
+            [$limit]
+        );
+    }
+
+    /**
+     * Get all published articles for sitemap
+     *
+     * @return array Articles with slug, updated_at
+     */
+    public function getPublishedArticlesForSitemap(): array
+    {
+        return $this->db->fetchAll(
+            'SELECT slug, updated_at, published_at
+             FROM articles
+             WHERE status = "published"
+               AND slug IS NOT NULL
+               AND slug != ""
+             ORDER BY published_at DESC'
+        );
     }
 }
