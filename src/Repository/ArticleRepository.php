@@ -17,7 +17,7 @@ class ArticleRepository
     public function save(Article $article): int
     {
         $this->db->execute(
-            'INSERT INTO articles (source_id, external_id, original_title, original_summary, original_url, original_language, published_at, fetched_at, country_code, status) 
+            'INSERT INTO articles (source_id, external_id, original_title, original_summary, original_url, original_language, published_at, fetched_at, country_code, status)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 $article->source_id,
@@ -45,12 +45,46 @@ class ArticleRepository
 
     public function getLatestArticles(int $limit = 50): array
     {
-        return $this->db->fetchAll('SELECT * FROM articles ORDER BY published_at DESC LIMIT ?', [$limit]);
+        return $this->db->fetchAll(
+            'SELECT a.*,
+                    COALESCE(a.title_ru, a.original_title) AS display_title,
+                    COALESCE(a.summary_ru, a.original_summary) AS display_summary,
+                    c.name_ru AS category_name,
+                    c.icon AS category_icon,
+                    c.color AS category_color,
+                    country.name_ru AS country_name,
+                    country.flag_emoji AS country_flag,
+                    s.name AS source_name
+             FROM articles a
+             LEFT JOIN categories c ON c.slug = a.category_slug
+             LEFT JOIN countries country ON country.code = a.country_code
+             LEFT JOIN sources s ON s.id = a.source_id
+             WHERE a.status IN ("published", "moderation")
+             ORDER BY a.published_at DESC
+             LIMIT ?',
+            [$limit]
+        );
     }
 
     public function findBySlug(string $slug): ?array
     {
-        return $this->db->fetch('SELECT * FROM articles WHERE slug = ?', [$slug]);
+        return $this->db->fetch(
+            'SELECT a.*,
+                    COALESCE(a.title_ru, a.original_title) AS display_title,
+                    COALESCE(a.summary_ru, a.original_summary) AS display_summary,
+                    c.name_ru AS category_name,
+                    c.icon AS category_icon,
+                    c.color AS category_color,
+                    country.name_ru AS country_name,
+                    country.flag_emoji AS country_flag,
+                    s.name AS source_name
+             FROM articles a
+             LEFT JOIN categories c ON c.slug = a.category_slug
+             LEFT JOIN countries country ON country.code = a.country_code
+             LEFT JOIN sources s ON s.id = a.source_id
+             WHERE a.slug = ?',
+            [$slug]
+        );
     }
 
     public function getArticlesForProcessing(int $limit = 10): array
