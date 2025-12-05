@@ -71,6 +71,14 @@ class Database
         return $result === false ? null : $result;
     }
 
+    /**
+     * Alias for fetch() - returns single row
+     */
+    public function fetchOne(string $sql, array $params = []): ?array
+    {
+        return $this->fetch($sql, $params);
+    }
+
     public function execute(string $sql, array $params = []): int
     {
         $statement = $this->getConnection()->prepare($sql);

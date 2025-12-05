@@ -43,6 +43,7 @@ if (file_exists($autoloader)) {
     });
 }
 
+use App\Controller\AdminController;
 use App\Controller\ApiController;
 use App\Controller\ArticleController;
 use App\Controller\ClusterController;
@@ -52,8 +53,11 @@ use App\Core\Config;
 use App\Core\Database;
 use App\Core\Response;
 use App\Core\Router;
+use App\Repository\AdminRepository;
 use App\Repository\ArticleRepository;
 use App\Repository\ClusterRepository;
+use App\Repository\SourceRepository;
+use App\Service\AuthService;
 
 $config = Config::loadDefault(BASE_PATH);
 $router = new Router();
@@ -63,12 +67,18 @@ $app = new App($config, $router, $database);
 // --- Repositories ---
 $articleRepository = new ArticleRepository($database);
 $clusterRepository = new ClusterRepository($database);
+$sourceRepository = new SourceRepository($database);
+$adminRepository = new AdminRepository($database);
+
+// --- Services ---
+$authService = new AuthService($adminRepository, $config);
 
 // --- Controllers ---
 $homeController = new HomeController($articleRepository, $clusterRepository, $database);
 $articleController = new ArticleController($articleRepository);
 $clusterController = new ClusterController($clusterRepository, $articleRepository);
 $apiController = new ApiController($articleRepository, $clusterRepository, $database);
+$adminController = new AdminController($authService, $articleRepository, $sourceRepository, $database);
 
 // --- Public Routes ---
 $router->get('/', [$homeController, 'index']);
@@ -80,6 +90,18 @@ $router->get('/clusters/{slug}', [$clusterController, 'show']);
 $router->get('/api/filters', [$apiController, 'filters']);
 $router->get('/api/news', [$apiController, 'news']);
 $router->get('/api/clusters', [$apiController, 'clusters']);
+
+// --- Admin Routes ---
+$router->get('/admin/login', [$adminController, 'loginForm']);
+$router->post('/admin/login', [$adminController, 'login']);
+$router->post('/admin/logout', [$adminController, 'logout']);
+$router->get('/admin', [$adminController, 'dashboard']);
+$router->get('/admin/moderation', [$adminController, 'moderation']);
+$router->post('/admin/article/{id}/approve', [$adminController, 'approve']);
+$router->post('/admin/article/{id}/reject', [$adminController, 'reject']);
+$router->get('/admin/sources', [$adminController, 'sources']);
+$router->post('/admin/source/{id}/toggle', [$adminController, 'toggleSource']);
+$router->get('/admin/logs', [$adminController, 'logs']);
 
 // --- System Routes ---
 $router->get('/health', function () use ($config): Response {
