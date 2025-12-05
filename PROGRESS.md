@@ -1,10 +1,20 @@
 # VanLife News Aggregator - Progress
 
-**Last Updated:** 2025-12-06
+**Last Updated:** 2025-12-05
 
-## Current Phase: PHASE 4 - Filters & Search (COMPLETED)
+## Current Phase: PHASE 5 - Admin Panel (IN PROGRESS)
 
 ### Task Status
+
+#### PHASE 5: Admin Panel
+| # | Task | Status | Date | Notes |
+|---|------|--------|------|-------|
+| 5.1 | Authorization (login/logout) | ✅ | 2025-12-05 | `AuthService`, `AdminRepository`, cookie sessions |
+| 5.2 | Dashboard with statistics | ✅ | 2025-12-05 | Articles by status, sources, clusters, recent errors |
+| 5.3 | Moderation queue | ✅ | 2025-12-05 | List of articles with approve/reject actions |
+| 5.4 | Approve/Reject articles | ✅ | 2025-12-05 | POST endpoints for moderation actions |
+| 5.5 | Sources management | ✅ | 2025-12-05 | Enable/disable sources, view stats |
+| 5.6 | Logs viewer | ✅ | 2025-12-05 | Filterable by level and context |
 
 #### PHASE 4: Filters & Search
 | # | Task | Status | Date | Notes |
@@ -66,6 +76,16 @@
 ---
 
 ## Change History
+
+### [2025-12-05] - PHASE 5 Admin Panel
+**Completed:**
+- **Authorization (Task 5.1):** Created `AuthService` and `AdminRepository` for session-based authentication with secure cookies
+- **Dashboard (Task 5.2):** Statistics panel showing articles by status, sources count, clusters, recent errors, last fetch/process metrics
+- **Moderation (Tasks 5.3, 5.4):** Queue of articles with status `moderation`, approve/reject buttons with redirect preservation
+- **Sources Management (Task 5.5):** List of RSS sources with enable/disable toggle, last fetch time, error status
+- **Logs Viewer (Task 5.6):** Filterable log viewer by level (debug/info/warning/error/critical) and context (fetcher/processor/api/admin)
+- **UI:** Created admin CSS with responsive design, login page, header navigation, tables, cards
+- **Routes:** Added 10 admin routes in `public/index.php`
 
 ### [2025-12-06] - PHASE 4 Completion
 **Completed:**
@@ -137,13 +157,12 @@
 ---
 
 ## Next Steps
-1. Реализовать административную панель (PHASE 5):
-   - Авторизация (login/logout)
-   - Dashboard со статистикой
-   - Модерация новостей
-   - Управление источниками
-2. Добавить SEO-оптимизацию (PHASE 6):
+1. Добавить SEO-оптимизацию (PHASE 6):
    - ЧПУ (slugs) для новостей
    - Meta-теги и Open Graph
    - Автогенерация sitemap.xml
    - Микроразметка Schema.org
+   - robots.txt
+   - Канонические URL
+   - Healthcheck endpoint (уже есть)
+   - GitHub Actions для автодеплоя

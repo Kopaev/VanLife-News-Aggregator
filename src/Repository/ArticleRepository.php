@@ -113,17 +113,59 @@ class ArticleRepository
         );
     }
 
-    public function getArticlesForModeration(int $limit = 20): array
+    public function getArticlesForModeration(int $limit = 20, int $offset = 0): array
     {
         return $this->db->fetchAll(
-            'SELECT a.*, s.name AS source_name FROM articles a
+            'SELECT a.*,
+                    COALESCE(a.title_ru, a.original_title) AS display_title,
+                    COALESCE(a.summary_ru, a.original_summary) AS display_summary,
+                    c.name_ru AS category_name,
+                    c.icon AS category_icon,
+                    c.color AS category_color,
+                    country.name_ru AS country_name,
+                    country.flag_emoji AS country_flag,
+                    s.name AS source_name
+             FROM articles a
+             LEFT JOIN categories c ON c.slug = a.category_slug
+             LEFT JOIN countries country ON country.code = a.country_code
              LEFT JOIN sources s ON s.id = a.source_id
-             WHERE a.ai_processed_at IS NOT NULL
-               AND a.moderated_at IS NULL
-               AND a.status IN ("published", "moderation")
-             ORDER BY a.ai_processed_at DESC
-             LIMIT ?',
-            [$limit]
+             WHERE a.status = "moderation"
+             ORDER BY a.published_at DESC
+             LIMIT ? OFFSET ?',
+            [$limit, $offset]
+        );
+    }
+
+    /**
+     * Get count of articles awaiting moderation
+     */
+    public function getModerationCount(): int
+    {
+        $result = $this->db->fetchOne(
+            'SELECT COUNT(*) as count FROM articles WHERE status = "moderation"'
+        );
+        return (int) ($result['count'] ?? 0);
+    }
+
+    /**
+     * Update article status
+     */
+    public function updateStatus(int $articleId, string $status): void
+    {
+        $this->db->execute(
+            'UPDATE articles SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            [$status, $articleId]
+        );
+    }
+
+    /**
+     * Reject article with reason
+     */
+    public function rejectArticle(int $articleId, string $reason): void
+    {
+        $this->db->execute(
+            'UPDATE articles SET status = "rejected", moderation_reason = ?, moderated_at = NOW(), updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+            [$reason, $articleId]
         );
     }
 
