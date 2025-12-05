@@ -420,4 +420,21 @@ class ClusterRepository
 
         return [implode(' AND ', $conditions), $params];
     }
+
+    /**
+     * Get all active clusters for sitemap
+     *
+     * @return array Clusters with slug, last_updated_at, created_at
+     */
+    public function getPublishedClustersForSitemap(): array
+    {
+        return $this->db->fetchAll(
+            'SELECT slug, last_updated_at, created_at
+             FROM clusters
+             WHERE is_active = 1
+               AND slug IS NOT NULL
+               AND slug != ""
+             ORDER BY last_updated_at DESC'
+        );
+    }
 }

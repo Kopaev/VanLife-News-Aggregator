@@ -381,6 +381,39 @@ footer {
     font-weight: 600;
 }
 
+.button--small {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.9rem;
+}
+
+.button--outline {
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.button--outline:hover {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+.article-actions {
+    margin-top: 1.25rem;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.article-card h2 a {
+    color: var(--text-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.article-card h2 a:hover {
+    color: var(--primary-color);
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 1.25rem;

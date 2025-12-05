@@ -129,7 +129,11 @@ $statusMap = [
                         </div>
                     </div>
 
-                    <h2><?php echo htmlspecialchars($article['display_title'] ?? $article['original_title']); ?></h2>
+                    <?php if (!empty($article['slug'])): ?>
+                        <h2><a href="/news/<?php echo htmlspecialchars($article['slug']); ?>"><?php echo htmlspecialchars($article['display_title'] ?? $article['original_title']); ?></a></h2>
+                    <?php else: ?>
+                        <h2><?php echo htmlspecialchars($article['display_title'] ?? $article['original_title']); ?></h2>
+                    <?php endif; ?>
 
                     <p class="article-summary">
                         <?php echo htmlspecialchars($article['display_summary'] ?? 'Описание появится после обработки.'); ?>
@@ -161,6 +165,12 @@ $statusMap = [
                             <?php foreach ($tags as $tag): ?>
                                 <span class="tag">#<?php echo htmlspecialchars($tag); ?></span>
                             <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($article['slug'])): ?>
+                        <div class="article-actions">
+                            <a href="/news/<?php echo htmlspecialchars($article['slug']); ?>" class="button button--small">Читать далее</a>
                         </div>
                     <?php endif; ?>
                 </div>

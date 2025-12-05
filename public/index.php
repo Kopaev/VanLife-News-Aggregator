@@ -104,13 +104,55 @@ $router->post('/admin/source/{id}/toggle', [$adminController, 'toggleSource']);
 $router->get('/admin/logs', [$adminController, 'logs']);
 
 // --- System Routes ---
-$router->get('/health', function () use ($config): Response {
+$router->get('/health', function () use ($config, $database): Response {
+    // Check database connection
+    $dbStatus = 'ok';
+    try {
+        $database->fetchOne('SELECT 1');
+    } catch (\Throwable) {
+        $dbStatus = 'error';
+    }
+
     return Response::json([
-        'status' => 'ok',
+        'status' => $dbStatus === 'ok' ? 'ok' : 'degraded',
         'app' => $config->get('app.name'),
         'environment' => $config->get('app.env'),
+        'database' => $dbStatus,
         'timestamp' => time(),
+        'version' => '1.0.0',
     ]);
+});
+
+// Sitemap
+$router->get('/sitemap.xml', function (): Response {
+    $sitemapPath = BASE_PATH . '/public/sitemap.xml';
+
+    if (!file_exists($sitemapPath)) {
+        return Response::text('Sitemap not found. Run: php scripts/generate_sitemap.php', 404);
+    }
+
+    $content = file_get_contents($sitemapPath);
+    return Response::xml($content);
+});
+
+// Robots.txt
+$router->get('/robots.txt', function () use ($config): Response {
+    $siteUrl = $config->get('app.url') ?: 'https://news.vanlife.bez.coffee';
+    $isProduction = $config->get('app.env') === 'production';
+
+    if ($isProduction) {
+        $content = "User-agent: *\n";
+        $content .= "Allow: /\n\n";
+        $content .= "Disallow: /admin\n";
+        $content .= "Disallow: /api/\n\n";
+        $content .= "Sitemap: {$siteUrl}/sitemap.xml\n";
+    } else {
+        // Block indexing on non-production environments
+        $content = "User-agent: *\n";
+        $content .= "Disallow: /\n";
+    }
+
+    return Response::text($content);
 });
 
 $app->run($_SERVER['REQUEST_METHOD'] ?? 'GET', $_SERVER['REQUEST_URI'] ?? '/');

@@ -1,6 +1,62 @@
 <?php require_once __DIR__ . '/../layout/header.php'; ?>
 
 <?php
+// Generate Schema.org JSON-LD
+$schemaOrg = [
+    '@context' => 'https://schema.org',
+    '@type' => 'NewsArticle',
+    'headline' => $article['display_title'] ?? $article['original_title'] ?? '',
+    'description' => $article['display_summary'] ?? $article['original_summary'] ?? '',
+    'datePublished' => isset($article['published_at']) ? date('c', strtotime($article['published_at'])) : null,
+    'dateModified' => isset($article['updated_at']) ? date('c', strtotime($article['updated_at'])) : null,
+    'author' => [
+        '@type' => 'Organization',
+        'name' => 'VanLife News',
+        'url' => getenv('APP_URL') ?: 'https://news.vanlife.bez.coffee',
+    ],
+    'publisher' => [
+        '@type' => 'Organization',
+        'name' => 'VanLife News',
+        'url' => getenv('APP_URL') ?: 'https://news.vanlife.bez.coffee',
+    ],
+    'mainEntityOfPage' => [
+        '@type' => 'WebPage',
+        '@id' => (getenv('APP_URL') ?: 'https://news.vanlife.bez.coffee') . '/news/' . ($article['slug'] ?? ''),
+    ],
+    'inLanguage' => 'ru',
+];
+
+// Add image if available
+if (!empty($article['image_url'])) {
+    $schemaOrg['image'] = $article['image_url'];
+}
+
+// Add category
+if (!empty($article['category_name'])) {
+    $schemaOrg['articleSection'] = $article['category_name'];
+}
+
+// Add keywords from tags
+$schemaTags = [];
+if (!empty($article['tags'])) {
+    $tags = is_string($article['tags']) ? json_decode($article['tags'], true) : $article['tags'];
+    if (is_array($tags)) {
+        $schemaTags = $tags;
+    }
+}
+if (!empty($schemaTags)) {
+    $schemaOrg['keywords'] = implode(', ', $schemaTags);
+}
+
+// Remove null values
+$schemaOrg = array_filter($schemaOrg, fn($v) => $v !== null);
+?>
+
+<script type="application/ld+json">
+<?php echo json_encode($schemaOrg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT); ?>
+</script>
+
+<?php
 $formatDate = static function (?string $datetime): string {
     if (!$datetime) {
         return '—';
