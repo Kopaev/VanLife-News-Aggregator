@@ -1,0 +1,118 @@
+:root {
+    --primary-color: #3a7bd5;
+    --background-color: #f4f4f9;
+    --text-color: #333;
+    --card-background: #fff;
+    --border-color: #ddd;
+    --header-background: #fff;
+}
+
+[data-theme="dark"] {
+    --primary-color: #00d2ff;
+    --background-color: #1a1a2e;
+    --text-color: #e0e0e0;
+    --card-background: #16213e;
+    --border-color: #333;
+    --header-background: #16213e;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+header {
+    background-color: var(--header-background);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+}
+
+header .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+.articles {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.article-card {
+    background-color: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: box-shadow 0.3s;
+}
+
+.article-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.article-card h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.article-card p {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.8;
+}
+
+.article-meta {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-color);
+    opacity: 0.6;
+}
+
+.article-meta a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.article-full h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.article-full .article-content {
+    margin-top: 2rem;
+}
+
+footer {
+    text-align: center;
+    margin-top: 3rem;
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+}

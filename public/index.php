@@ -43,77 +43,30 @@ if (file_exists($autoloader)) {
     });
 }
 
+use App\Controller\ArticleController;
+use App\Controller\HomeController;
 use App\Core\App;
 use App\Core\Config;
 use App\Core\Database;
 use App\Core\Response;
 use App\Core\Router;
+use App\Repository\ArticleRepository;
 
 $config = Config::loadDefault(BASE_PATH);
 $router = new Router();
 $database = new Database($config);
 $app = new App($config, $router, $database);
 
-$router->get('/', function (): Response {
-    $html = <<<HTML
-    <!DOCTYPE html>
-    <html lang="ru">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>VanLife News Aggregator</title>
-        <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-                background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #fff;
-            }
-            .container { text-align: center; padding: 2rem; }
-            .logo { font-size: 4rem; margin-bottom: 1rem; }
-            h1 {
-                font-size: 2.5rem;
-                margin-bottom: 0.5rem;
-                background: linear-gradient(90deg, #00d2ff, #3a7bd5);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-            }
-            .subtitle { font-size: 1.2rem; color: #8892b0; margin-bottom: 2rem; }
-            .status { background: rgba(255,255,255,0.1); border-radius: 1rem; padding: 1.5rem 2rem; display: inline-block; }
-            .status-badge { display: inline-block; background: #ffc107; color: #000; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; }
-            .status p { color: #ccd6f6; }
-            .features { margin-top: 2rem; text-align: left; display: inline-block; }
-            .features li { color: #8892b0; margin: 0.5rem 0; list-style: none; }
-            .features li::before { content: '✓ '; color: #64ffda; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="logo">🚐</div>
-            <h1>VanLife News Aggregator</h1>
-            <p class="subtitle">Новости о vanlife и автодомах со всего мира</p>
-            <div class="status">
-                <span class="status-badge">В разработке</span>
-                <p>Сайт находится в стадии разработки</p>
-            </div>
-            <ul class="features">
-                <li>Новости из 20+ стран</li>
-                <li>Автоматический перевод на русский</li>
-                <li>Умная категоризация</li>
-                <li>Группировка похожих новостей</li>
-            </ul>
-        </div>
-    </body>
-    </html>
-    HTML;
+// --- Repositories ---
+$articleRepository = new ArticleRepository($database);
 
-    return Response::html($html);
-});
+// --- Controllers ---
+$homeController = new HomeController($articleRepository);
+$articleController = new ArticleController($articleRepository);
+
+
+$router->get('/', [$homeController, 'index']);
+$router->get('/news/{slug}', [$articleController, 'show']);
 
 $router->get('/health', function () use ($config): Response {
     return Response::json([
@@ -125,3 +78,4 @@ $router->get('/health', function () use ($config): Response {
 });
 
 $app->run($_SERVER['REQUEST_METHOD'] ?? 'GET', $_SERVER['REQUEST_URI'] ?? '/');
+
