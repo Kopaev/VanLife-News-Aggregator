@@ -1,0 +1,203 @@
+<?php
+
+namespace App\Service;
+
+use App\AI\OpenAIProvider;
+use App\Repository\ArticleRepository;
+use DateTimeImmutable;
+use RuntimeException;
+
+class NewsProcessor
+{
+    private const PROMPT_TEMPLATE = <<<PROMPT
+Ты — эксперт по vanlife/автодомам. Проанализируй новость и верни JSON.
+
+НОВОСТЬ:
+Заголовок: {title}
+Описание: {summary}
+Источник: {source}
+Язык: {language}
+
+ЗАДАЧА:
+1. Оцени релевантность для vanlife-аудитории (0-100)
+2. Определи категорию
+3. Определи страну, о которой новость (если есть)
+4. Сгенерируй 3-5 тегов
+5. Проверь на "опасный" контент
+
+КАТЕГОРИИ:
+- law — законы и правила
+- ban — запреты и штрафы
+- opening — открытия кемпингов/стоянок
+- closing — закрытия
+- incident — происшествия
+- festival — фестивали
+- expo — выставки
+- industry — индустрия
+- review — обзоры
+- other — прочее
+
+ФОРМАТ ОТВЕТА (только JSON, без markdown):
+{
+  "relevance_score": 85,
+  "category": "ban",
+  "country_code": "DE",
+  "tags": ["germany", "parking-ban", "munich"],
+  "is_dangerous": false,
+  "danger_reason": null
+}
+PROMPT;
+
+    private array $moderationRules;
+
+    public function __construct(
+        private readonly OpenAIProvider $aiProvider,
+        private readonly LoggerService $logger,
+        private readonly ArticleRepository $articleRepository
+    ) {
+        $this->moderationRules = require dirname(__DIR__, 2) . '/config/moderation.php';
+    }
+
+    public function processRelevance(int $limit = 10): int
+    {
+        $articles = $this->articleRepository->getArticlesForProcessing($limit);
+        $processed = 0;
+
+        foreach ($articles as $article) {
+            try {
+                $this->processArticle($article);
+                $processed++;
+            } catch (\Throwable $e) {
+                $this->logger->error('NewsProcessor', 'Failed to process article', [
+                    'article_id' => $article['id'] ?? null,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $processed;
+    }
+
+    private function processArticle(array $article): void
+    {
+        $processedAt = (new DateTimeImmutable('now'))->format('Y-m-d H:i:s');
+
+        if ($this->isAutoReject($article)) {
+            $this->articleRepository->updateRelevance(
+                (int)$article['id'],
+                0,
+                'rejected',
+                'auto_reject_keyword',
+                $processedAt
+            );
+
+            $this->logger->info('NewsProcessor', 'Article auto-rejected by keyword', [
+                'article_id' => $article['id'],
+            ]);
+
+            return;
+        }
+
+        $payload = $this->buildPromptPayload($article);
+        $response = $this->aiProvider->chat(
+            [
+                [
+                    'role' => 'user',
+                    'content' => strtr(self::PROMPT_TEMPLATE, $payload),
+                ],
+            ],
+            [
+                'response_format' => ['type' => 'json_object'],
+            ]
+        );
+
+        $result = $this->parseResponse($response->content);
+        $score = $this->normalizeScore($result['relevance_score'] ?? null);
+        $isDangerous = (bool)($result['is_dangerous'] ?? false);
+        $dangerReason = $result['danger_reason'] ?? null;
+
+        [$status, $reason] = $this->determineStatus($score, $isDangerous, $dangerReason);
+
+        $this->articleRepository->updateRelevance(
+            (int)$article['id'],
+            $score,
+            $status,
+            $reason,
+            $processedAt
+        );
+
+        $this->logger->info('NewsProcessor', 'Article processed for relevance', [
+            'article_id' => $article['id'],
+            'score' => $score,
+            'status' => $status,
+        ]);
+    }
+
+    private function buildPromptPayload(array $article): array
+    {
+        return [
+            '{title}' => (string)($article['original_title'] ?? ''),
+            '{summary}' => (string)($article['original_summary'] ?? ''),
+            '{source}' => (string)($article['source_name'] ?? ''),
+            '{language}' => (string)($article['original_language'] ?? 'unknown'),
+        ];
+    }
+
+    private function parseResponse(string $content): array
+    {
+        $decoded = json_decode($content, true);
+
+        if (!is_array($decoded)) {
+            throw new RuntimeException('Failed to decode OpenAI response as JSON.');
+        }
+
+        return $decoded;
+    }
+
+    private function determineStatus(int $score, bool $isDangerous, ?string $dangerReason): array
+    {
+        $minScore = (int)($this->moderationRules['min_relevance_score'] ?? 30);
+        $autoPublishScore = (int)($this->moderationRules['auto_publish_score'] ?? 70);
+
+        if ($isDangerous) {
+            return ['moderation', $dangerReason ?: 'dangerous_content'];
+        }
+
+        if ($score >= $autoPublishScore) {
+            return ['published', null];
+        }
+
+        if ($score >= $minScore) {
+            return ['moderation', null];
+        }
+
+        return ['rejected', 'low_relevance'];
+    }
+
+    private function normalizeScore(mixed $rawScore): int
+    {
+        if (!is_numeric($rawScore)) {
+            return 0;
+        }
+
+        return max(0, min(100, (int)$rawScore));
+    }
+
+    private function isAutoReject(array $article): bool
+    {
+        $rules = $this->moderationRules['auto_reject'] ?? [];
+        if (empty($rules)) {
+            return false;
+        }
+
+        $haystack = mb_strtolower(((string)($article['original_title'] ?? '')) . ' ' . ((string)($article['original_summary'] ?? '')));
+
+        foreach ($rules as $keyword) {
+            if (str_contains($haystack, mb_strtolower($keyword))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
