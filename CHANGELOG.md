@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Исправлен cron сбора новостей: корректная инициализация `LoggerService` и зависимостей `GoogleNewsUrlDecoder`
 - ClusteringService с вычислением схожести (заголовок/саммари/теги/метаданные) и настройками в `config/clustering.php` + `.env`
 - ClusterManager/ClusterRepository для создания и обновления кластеров; новые параметры `.env` (`CLUSTER_BATCH_SIZE`, `CLUSTER_CANDIDATES_LIMIT`, `CLUSTER_ATTACH_LIMIT`)
+- ClusterMainSelector: автоматический выбор главной статьи кластера (учитывает релевантность, свежесть, перевод, изображение и просмотры) + новые параметры `.env` (`CLUSTER_MAIN_*`)
 - Методы `execute` и `lastInsertId` в `Database` для корректной работы репозиториев
 - Migration runner `scripts/migrate.php` with seed loading option
 - Initial SQL migration `sql/migrations/001_init_schema.sql` with full schema and decoded URL cache
