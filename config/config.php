@@ -30,21 +30,23 @@ if (file_exists($envFile)) {
 /**
  * Get environment variable with default value
  */
-function env(string $key, mixed $default = null): mixed
-{
-    $value = $_ENV[$key] ?? getenv($key);
+if (!function_exists('env')) {
+    function env(string $key, mixed $default = null): mixed
+    {
+        $value = $_ENV[$key] ?? getenv($key);
 
-    if ($value === false || $value === '') {
-        return $default;
+        if ($value === false || $value === '') {
+            return $default;
+        }
+
+        // Convert string booleans
+        return match (strtolower((string)$value)) {
+            'true', '(true)' => true,
+            'false', '(false)' => false,
+            'null', '(null)' => null,
+            default => $value,
+        };
     }
-
-    // Convert string booleans
-    return match (strtolower((string)$value)) {
-        'true', '(true)' => true,
-        'false', '(false)' => false,
-        'null', '(null)' => null,
-        default => $value,
-    };
 }
 
 return [
