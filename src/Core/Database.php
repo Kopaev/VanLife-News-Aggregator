@@ -71,6 +71,19 @@ class Database
         return $result === false ? null : $result;
     }
 
+    public function execute(string $sql, array $params = []): int
+    {
+        $statement = $this->getConnection()->prepare($sql);
+        $statement->execute($params);
+
+        return $statement->rowCount();
+    }
+
+    public function lastInsertId(): int
+    {
+        return (int)$this->getConnection()->lastInsertId();
+    }
+
     public function transactional(callable $callback): mixed
     {
         $pdo = $this->getConnection();

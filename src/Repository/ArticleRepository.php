@@ -52,4 +52,27 @@ class ArticleRepository
     {
         return $this->db->fetch('SELECT * FROM articles WHERE slug = ?', [$slug]);
     }
+
+    public function getArticlesForProcessing(int $limit = 10): array
+    {
+        return $this->db->fetchAll(
+            'SELECT a.*, s.name AS source_name FROM articles a
+             LEFT JOIN sources s ON s.id = a.source_id
+             WHERE a.status = "new" ORDER BY a.published_at DESC LIMIT ?',
+            [$limit]
+        );
+    }
+
+    public function updateRelevance(
+        int $articleId,
+        int $score,
+        string $status,
+        ?string $moderationReason,
+        string $processedAt
+    ): void {
+        $this->db->execute(
+            'UPDATE articles SET ai_relevance_score = ?, status = ?, moderation_reason = ?, ai_processed_at = ? WHERE id = ?',
+            [$score, $status, $moderationReason, $processedAt, $articleId]
+        );
+    }
 }

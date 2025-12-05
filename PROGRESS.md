@@ -1,6 +1,6 @@
 # VanLife News Aggregator - Progress
 
-**Last Updated:** 2025-12-05
+**Last Updated:** 2025-12-06
 
 ## Current Phase: PHASE 2 - AI Processing
 
@@ -25,7 +25,7 @@
 | # | Task | Status | Date | Notes |
 |---|------|--------|------|-------|
 | 2.1 | OpenAI Provider | ✅ | 2025-12-05 | Добавлен `OpenAIProvider` с оберткой ответа и ограничением запросов |
-| 2.2 | NewsProcessor - relevance scoring | ⬜ | - | - |
+| 2.2 | NewsProcessor - relevance scoring | ✅ | 2025-12-06 | Добавлен сервис релевантности с OpenAI и правилами модерации |
 | 2.3 | NewsProcessor - categorization and tags | ⬜ | - | - |
 | 2.4 | TranslationService | ⬜ | - | - |
 | 2.5 | ModerationService | ⬜ | - | - |
@@ -66,6 +66,6 @@
 ---
 
 ## Next Steps
-1. Реализовать Task 2.2: NewsProcessor — модуль оценки релевантности на базе OpenAIProvider.
-2. Добавить категоризацию, теги и перевод новостей (Tasks 2.3–2.4).
+1. Реализовать Task 2.3: NewsProcessor — категоризация и теги.
+2. Добавить перевод новостей на русский язык (Task 2.4).
 3. Создать cron-скрипт для AI-пайплайна (Task 2.6) и обновить шаблоны (Task 2.7).
