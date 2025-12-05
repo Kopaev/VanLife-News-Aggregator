@@ -10,9 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Migration runner `scripts/migrate.php` with seed loading option
 - Initial SQL migration `sql/migrations/001_init_schema.sql` with full schema and decoded URL cache
+- Core framework layer: `Config`, `Database`, `Router`, `Response`, `App`
+- Entry point wired to router with landing page and `/health` endpoint
 
 ### In Progress
-- PHASE 1: Foundation - Core classes implementation
+- PHASE 1: Foundation - GoogleNewsUrlDecoder
 
 ---
 
