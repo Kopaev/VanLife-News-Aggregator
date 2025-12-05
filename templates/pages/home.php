@@ -34,6 +34,11 @@ $statusMap = [
     <h1>Свежие новости</h1>
     <p class="page-lead">Переведённые и отсортированные материалы о vanlife: категории, страны, релевантность и теги от AI.</p>
 
+    <?php
+    // Include filters component
+    require_once __DIR__ . '/../components/filters.php';
+    ?>
+
     <section class="cluster-section">
         <div class="section-header">
             <div>
@@ -92,7 +97,9 @@ $statusMap = [
         <?php endif; ?>
     </section>
 
-    <div class="articles">
+    <h2 class="section-title">Все новости</h2>
+
+    <div id="news-container" class="articles">
         <?php if (empty($articles)): ?>
             <p>Пока нет опубликованных новостей.</p>
         <?php else: ?>
@@ -160,6 +167,10 @@ $statusMap = [
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
+
+    <div id="pagination-container"></div>
 </div>
+
+<script src="/js/filters.js"></script>
 
 <?php require_once __DIR__ . '/../layout/footer.php'; ?>

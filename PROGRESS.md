@@ -2,9 +2,20 @@
 
 **Last Updated:** 2025-12-06
 
-## Current Phase: PHASE 4 - Filters & Search
+## Current Phase: PHASE 4 - Filters & Search (COMPLETED)
 
 ### Task Status
+
+#### PHASE 4: Filters & Search
+| # | Task | Status | Date | Notes |
+|---|------|--------|------|-------|
+| 4.1 | API endpoint for filters | ✅ | 2025-12-06 | `/api/filters`, `/api/news`, `/api/clusters` endpoints |
+| 4.2 | JS filtering logic (without reload) | ✅ | 2025-12-06 | `public/js/filters.js` with dynamic loading |
+| 4.3 | Filter by countries | ✅ | 2025-12-06 | Integrated in API and UI |
+| 4.4 | Filter by categories | ✅ | 2025-12-06 | Integrated in API and UI |
+| 4.5 | Filter by original language | ✅ | 2025-12-06 | Integrated in API and UI |
+| 4.6 | Filter by period | ✅ | 2025-12-06 | Today, Week, Month, All |
+| 4.7 | Save filters in URL | ✅ | 2025-12-06 | Query params in URL with history API |
 
 #### PHASE 1: Foundation (MVP without AI)
 | # | Task | Status | Date | Notes |
@@ -56,6 +67,29 @@
 
 ## Change History
 
+### [2025-12-06] - PHASE 4 Completion
+**Completed:**
+- **API Endpoints (Task 4.1):** Created `ApiController` with three endpoints:
+  - `/api/filters` - returns available filter options (categories, countries, languages)
+  - `/api/news` - returns filtered news with pagination
+  - `/api/clusters` - returns filtered clusters with pagination
+- **Repository Methods (Tasks 4.3-4.6):** Added filtering methods to `ArticleRepository` and `ClusterRepository`:
+  - `getFilteredArticles()` and `getFilteredCount()` for articles
+  - `getFilteredClusters()` and `getFilteredCount()` for clusters
+  - Support for filtering by category, country, language, and period (today/week/month/year)
+- **JavaScript Logic (Task 4.2, 4.7):** Created `public/js/filters.js` with:
+  - Dynamic loading of articles without page reload
+  - URL state management (filters saved in query parameters)
+  - History API integration for browser back/forward navigation
+  - Pagination support
+- **UI Component (Tasks 4.3-4.6):** Created `templates/components/filters.php`:
+  - Filter buttons for categories, countries, and periods
+  - Language dropdown selector
+  - Active filter highlighting
+  - Clear filters button
+  - Responsive design
+- **Integration:** Updated `HomeController` to load filter data and pass to templates
+
 ### [2025-12-05] - PHASE 1 Completion
 **Completed:**
 - **NewsFetcher Service (Task 1.5):** Implemented the service to fetch news from all enabled RSS sources. It uses the `GoogleNewsUrlDecoder` and saves new articles to the database.
@@ -103,5 +137,13 @@
 ---
 
 ## Next Steps
-1. Подготовить фильтры и поиск (PHASE 4).
-2. Реализовать публичные API-эндпоинты для новостей и кластеров (PHASE 5 по плану промпта).
+1. Реализовать административную панель (PHASE 5):
+   - Авторизация (login/logout)
+   - Dashboard со статистикой
+   - Модерация новостей
+   - Управление источниками
+2. Добавить SEO-оптимизацию (PHASE 6):
+   - ЧПУ (slugs) для новостей
+   - Meta-теги и Open Graph
+   - Автогенерация sitemap.xml
+   - Микроразметка Schema.org

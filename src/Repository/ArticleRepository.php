@@ -254,4 +254,112 @@ class ArticleRepository
             $params
         );
     }
+
+    /**
+     * Get filtered articles with pagination
+     */
+    public function getFilteredArticles(
+        ?string $category = null,
+        ?string $country = null,
+        ?string $language = null,
+        ?string $period = null,
+        int $limit = 20,
+        int $offset = 0
+    ): array {
+        [$whereClause, $params] = $this->buildFilterConditions($category, $country, $language, $period);
+        $params[] = $limit;
+        $params[] = $offset;
+
+        return $this->db->fetchAll(
+            "SELECT a.*,
+                    COALESCE(a.title_ru, a.original_title) AS display_title,
+                    COALESCE(a.summary_ru, a.original_summary) AS display_summary,
+                    c.name_ru AS category_name,
+                    c.icon AS category_icon,
+                    c.color AS category_color,
+                    country.name_ru AS country_name,
+                    country.flag_emoji AS country_flag,
+                    s.name AS source_name
+             FROM articles a
+             LEFT JOIN categories c ON c.slug = a.category_slug
+             LEFT JOIN countries country ON country.code = a.country_code
+             LEFT JOIN sources s ON s.id = a.source_id
+             WHERE {$whereClause}
+             ORDER BY a.published_at DESC
+             LIMIT ? OFFSET ?",
+            $params
+        );
+    }
+
+    /**
+     * Get count of filtered articles
+     */
+    public function getFilteredCount(
+        ?string $category = null,
+        ?string $country = null,
+        ?string $language = null,
+        ?string $period = null
+    ): int {
+        [$whereClause, $params] = $this->buildFilterConditions($category, $country, $language, $period);
+
+        return (int)$this->db->fetchOne(
+            "SELECT COUNT(*) FROM articles a WHERE {$whereClause}",
+            $params
+        );
+    }
+
+    /**
+     * Build WHERE clause and parameters for filtering
+     */
+    private function buildFilterConditions(
+        ?string $category,
+        ?string $country,
+        ?string $language,
+        ?string $period
+    ): array {
+        $conditions = ['a.status IN ("published", "moderation")'];
+        $params = [];
+
+        // Filter by category
+        if ($category) {
+            $conditions[] = 'a.category_slug = ?';
+            $params[] = $category;
+        }
+
+        // Filter by country
+        if ($country) {
+            $conditions[] = 'a.country_code = ?';
+            $params[] = $country;
+        }
+
+        // Filter by original language
+        if ($language) {
+            $conditions[] = 'a.original_language = ?';
+            $params[] = $language;
+        }
+
+        // Filter by period
+        if ($period) {
+            $dateCondition = $this->getPeriodDateCondition($period);
+            if ($dateCondition) {
+                $conditions[] = $dateCondition;
+            }
+        }
+
+        return [implode(' AND ', $conditions), $params];
+    }
+
+    /**
+     * Get date condition for period filter
+     */
+    private function getPeriodDateCondition(string $period): ?string
+    {
+        return match ($period) {
+            'today' => 'a.published_at >= CURDATE()',
+            'week' => 'a.published_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)',
+            'month' => 'a.published_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)',
+            'year' => 'a.published_at >= DATE_SUB(NOW(), INTERVAL 365 DAY)',
+            default => null,
+        };
+    }
 }

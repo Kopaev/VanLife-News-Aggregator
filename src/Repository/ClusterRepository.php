@@ -347,4 +347,77 @@ class ClusterRepository
 
         return $text;
     }
+
+    /**
+     * Get filtered clusters with pagination
+     */
+    public function getFilteredClusters(
+        ?string $category = null,
+        ?string $country = null,
+        int $limit = 20,
+        int $offset = 0
+    ): array {
+        [$whereClause, $params] = $this->buildFilterConditions($category, $country);
+        $params[] = $limit;
+        $params[] = $offset;
+
+        $clusters = $this->db->fetchAll(
+            "SELECT c.*,
+                    cat.name_ru AS category_name,
+                    cat.icon AS category_icon,
+                    cat.color AS category_color,
+                    ma.slug AS main_article_slug,
+                    ma.status AS main_article_status,
+                    COALESCE(ma.title_ru, ma.original_title) AS main_display_title,
+                    COALESCE(ma.summary_ru, ma.original_summary) AS main_display_summary,
+                    ma.image_url AS main_image_url
+             FROM clusters c
+             LEFT JOIN categories cat ON cat.slug = c.category_slug
+             LEFT JOIN articles ma ON ma.id = c.main_article_id
+             WHERE {$whereClause}
+             ORDER BY c.last_updated_at DESC
+             LIMIT ? OFFSET ?",
+            $params
+        );
+
+        return $this->hydrateCountries($clusters);
+    }
+
+    /**
+     * Get count of filtered clusters
+     */
+    public function getFilteredCount(
+        ?string $category = null,
+        ?string $country = null
+    ): int {
+        [$whereClause, $params] = $this->buildFilterConditions($category, $country);
+
+        return (int)$this->db->fetchOne(
+            "SELECT COUNT(*) FROM clusters c WHERE {$whereClause}",
+            $params
+        );
+    }
+
+    /**
+     * Build WHERE clause and parameters for filtering
+     */
+    private function buildFilterConditions(?string $category, ?string $country): array
+    {
+        $conditions = ['c.is_active = 1'];
+        $params = [];
+
+        // Filter by category
+        if ($category) {
+            $conditions[] = 'c.category_slug = ?';
+            $params[] = $category;
+        }
+
+        // Filter by country - check if country code is in the JSON array
+        if ($country) {
+            $conditions[] = 'JSON_CONTAINS(c.countries, ?)';
+            $params[] = json_encode($country);
+        }
+
+        return [implode(' AND ', $conditions), $params];
+    }
 }
