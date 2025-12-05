@@ -18,6 +18,7 @@ class ClusterManager
         private readonly ClusteringService $clusteringService,
         private readonly ArticleRepository $articleRepository,
         private readonly ClusterRepository $clusterRepository,
+        private readonly ClusterMainSelector $mainSelector,
         private readonly LoggerService $logger,
         private readonly Config $config
     ) {
@@ -67,6 +68,7 @@ class ClusterManager
         if (empty($similar)) {
             $clusterId = $this->clusterRepository->createFromArticles($article);
             $this->articleRepository->assignToCluster([(int)$article['id']], $clusterId);
+            $this->finalizeCluster($clusterId);
             $this->logger->info('ClusterManager', 'Created new cluster for isolated article', [
                 'article_id' => $article['id'],
                 'cluster_id' => $clusterId,
@@ -82,7 +84,7 @@ class ClusterManager
             $clusterId = $this->clusterRepository->createFromArticles($article, $unclusteredMatches);
             $articleIds = array_merge([(int)$article['id']], $this->extractIds($unclusteredMatches));
             $this->articleRepository->assignToCluster($articleIds, $clusterId);
-            $this->clusterRepository->recalculateStats($clusterId);
+            $this->finalizeCluster($clusterId);
 
             $this->logger->info('ClusterManager', 'Created new cluster with similar articles', [
                 'cluster_id' => $clusterId,
@@ -96,7 +98,7 @@ class ClusterManager
         $attachIds = $this->extractIds($unclusteredMatches);
         $articleIds = array_merge([(int)$article['id']], $attachIds);
         $this->articleRepository->assignToCluster($articleIds, $targetClusterId);
-        $this->clusterRepository->recalculateStats($targetClusterId);
+        $this->finalizeCluster($targetClusterId);
 
         $this->logger->info('ClusterManager', 'Attached article to existing cluster', [
             'cluster_id' => $targetClusterId,
@@ -173,5 +175,25 @@ class ClusterManager
     private function extractIds(array $articles): array
     {
         return array_values(array_map(static fn(array $article): int => (int)$article['id'], $articles));
+    }
+
+    private function finalizeCluster(int $clusterId): void
+    {
+        $this->clusterRepository->recalculateStats($clusterId);
+
+        $mainArticleId = $this->mainSelector->selectMainArticleId(
+            $this->articleRepository->getClusterArticles($clusterId)
+        );
+
+        if ($mainArticleId === null) {
+            return;
+        }
+
+        $this->clusterRepository->setMainArticle($clusterId, $mainArticleId);
+
+        $this->logger->info('ClusterManager', 'Selected main article for cluster', [
+            'cluster_id' => $clusterId,
+            'main_article_id' => $mainArticleId,
+        ]);
     }
 }

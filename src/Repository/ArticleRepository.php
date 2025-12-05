@@ -217,6 +217,19 @@ class ArticleRepository
         );
     }
 
+    public function getClusterArticles(int $clusterId): array
+    {
+        return $this->db->fetchAll(
+            'SELECT id, title_ru, original_title, summary_ru, original_summary, image_url, views_count,
+                    status, published_at, ai_relevance_score
+             FROM articles
+             WHERE cluster_id = ?
+               AND status IN ("published", "moderation")
+             ORDER BY published_at DESC',
+            [$clusterId]
+        );
+    }
+
     public function assignToCluster(array $articleIds, int $clusterId): void
     {
         $ids = array_values(array_unique(array_map('intval', $articleIds)));

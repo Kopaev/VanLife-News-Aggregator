@@ -96,6 +96,14 @@ class ClusterRepository
         );
     }
 
+    public function setMainArticle(int $clusterId, int $articleId): void
+    {
+        $this->db->execute(
+            'UPDATE clusters SET main_article_id = ? WHERE id = ?',
+            [$articleId, $clusterId]
+        );
+    }
+
     private function resolveTitle(array $article): string
     {
         $title = $article['title_ru'] ?? $article['original_title'] ?? '';

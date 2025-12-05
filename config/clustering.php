@@ -44,4 +44,15 @@ return [
         // Сколько бесхозных статей можно автоматически присоединить к одному кластеру
         'attach_limit' => (int)env('CLUSTER_ATTACH_LIMIT', 5),
     ],
+
+    // Настройки выбора главной статьи в кластере
+    'main_selection' => [
+        'freshness_half_life_hours' => (int)env('CLUSTER_MAIN_HALFLIFE_HOURS', 72),
+        'translation_bonus' => (float)env('CLUSTER_MAIN_TRANSLATION_BONUS', 12),
+        'image_bonus' => (float)env('CLUSTER_MAIN_IMAGE_BONUS', 6),
+        'published_bonus' => (float)env('CLUSTER_MAIN_PUBLISHED_BONUS', 8),
+        'views_weight' => (float)env('CLUSTER_MAIN_VIEWS_WEIGHT', 0.05),
+        'views_cap' => (int)env('CLUSTER_MAIN_VIEWS_CAP', 200),
+        'relevance_floor' => (float)env('CLUSTER_MAIN_RELEVANCE_FLOOR', 50),
+    ],
 ];
