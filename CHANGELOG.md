@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - NewsProcessor сохраняет AI-определённые категорию (`category_slug`), страну и теги статьи
 - TranslationService для перевода статей на русский язык и записи в таблицы `articles` и `translations`
 - ModerationService для постобработки контента: автопоиск ключевых слов для отклонения/ручной модерации, отметка `moderated_at` и логирование решений
+- Публичные шаблоны на русском: категория/страна, теги, статус статьи и перевод в карточках новостей
 - Cron-скрипт `scripts/process_news.php`, объединяющий AI-разметку, переводы и модерацию с конфигурируемыми батчами
 - Исправлен cron сбора новостей: корректная инициализация `LoggerService` и зависимостей `GoogleNewsUrlDecoder`
 - Методы `execute` и `lastInsertId` в `Database` для корректной работы репозиториев

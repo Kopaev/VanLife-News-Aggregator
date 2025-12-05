@@ -1,6 +1,6 @@
 # VanLife News Aggregator - Progress
 
-**Last Updated:** 2025-12-05
+**Last Updated:** 2025-12-06
 
 ## Current Phase: PHASE 2 - AI Processing
 
@@ -30,7 +30,7 @@
 | 2.4 | TranslationService | ✅ | 2025-12-06 | Перевод на русский через OpenAI, запись в articles + translations |
 | 2.5 | ModerationService | ✅ | 2025-12-06 | Ключевые слова для автоотклонения/ручной модерации, отметка moderated_at |
 | 2.6 | Cron script for processing | ✅ | 2025-12-05 | `process_news.php` запускает разметку, перевод и модерацию батчами |
-| 2.7 | Template updates (Russian titles, categories) | ⬜ | - | - |
+| 2.7 | Template updates (Russian titles, categories) | ✅ | 2025-12-06 | Русифицированные шаблоны с категориями, странами, тегами и статусами |
 | 2.8 | Token usage optimization | ⬜ | - | - |
 
 ... (rest of the phases remain the same)
@@ -61,9 +61,12 @@
 ### [2025-12-06] - Task 2.5 ModerationService
 - Added `ModerationService` to apply moderation rules after AI-разметки: автоотклонение по списку `auto_reject`, флаги модерации по `require_moderation`, возврат низкобалльных публикаций в статус `moderation` и отметка `moderated_at` с логированием.
 
-### [2025-12-05] - Task 2.6 Processing Cron
+### [2025-12-06] - Task 2.6 Processing Cron
 - Added `scripts/process_news.php` to run relevance scoring, translations, and moderation in batch sizes configurable via `.env`.
 - Fixed cron logging setup for scripts by instantiating `LoggerService` with config and aligning dependencies for URL decoder.
+
+### [2025-12-06] - Task 2.7 Template updates
+- Обновлены публичные шаблоны: русский интерфейс, категории/страны, теги, статус статьи и вывод перевода.
 
 ### [2025-12-05] - Task 1.1 - 1.4
 ... (previous entries)
@@ -76,6 +79,6 @@
 ---
 
 ## Next Steps
-1. Обновить шаблоны под русские заголовки, категории и статусы (Task 2.7).
-2. Оптимизировать расход токенов и пересмотреть пайплайн (Task 2.8).
-3. Добавить кластеризацию и визуализацию (следующие задачи PHASE 3).
+1. Оптимизировать расход токенов и пересмотреть пайплайн (Task 2.8).
+2. Добавить кластеризацию и визуализацию (PHASE 3).
+3. Подготовить фильтры и поиск (PHASE 4).
