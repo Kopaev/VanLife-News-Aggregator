@@ -22,7 +22,8 @@ jobs:
           port: 22
           script: |
             cd /home/vanlife/VanLife-News-Aggregator
-            git pull origin main
+            git fetch origin
+            git reset --hard origin/main
             composer install --no-dev --optimize-autoloader
             php scripts/migrate.php
             echo "Deploy finished"
