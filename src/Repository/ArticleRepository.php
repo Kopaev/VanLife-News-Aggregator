@@ -63,16 +63,33 @@ class ArticleRepository
         );
     }
 
-    public function updateRelevance(
+    public function updateProcessing(
         int $articleId,
         int $score,
         string $status,
         ?string $moderationReason,
-        string $processedAt
+        string $processedAt,
+        ?string $categorySlug,
+        ?string $countryCode,
+        ?array $tags
     ): void {
+        $tagsJson = $tags ? json_encode($tags, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null;
+
         $this->db->execute(
-            'UPDATE articles SET ai_relevance_score = ?, status = ?, moderation_reason = ?, ai_processed_at = ? WHERE id = ?',
-            [$score, $status, $moderationReason, $processedAt, $articleId]
+            'UPDATE articles
+             SET ai_relevance_score = ?, status = ?, moderation_reason = ?, ai_processed_at = ?,
+                 category_slug = ?, country_code = ?, tags = ?
+             WHERE id = ?',
+            [
+                $score,
+                $status,
+                $moderationReason,
+                $processedAt,
+                $categorySlug,
+                $countryCode,
+                $tagsJson,
+                $articleId,
+            ]
         );
     }
 }

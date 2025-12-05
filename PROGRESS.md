@@ -26,7 +26,7 @@
 |---|------|--------|------|-------|
 | 2.1 | OpenAI Provider | ✅ | 2025-12-05 | Добавлен `OpenAIProvider` с оберткой ответа и ограничением запросов |
 | 2.2 | NewsProcessor - relevance scoring | ✅ | 2025-12-06 | Добавлен сервис релевантности с OpenAI и правилами модерации |
-| 2.3 | NewsProcessor - categorization and tags | ⬜ | - | - |
+| 2.3 | NewsProcessor - categorization and tags | ✅ | 2025-12-06 | Запись категории, страны и тегов из OpenAI-ответа |
 | 2.4 | TranslationService | ⬜ | - | - |
 | 2.5 | ModerationService | ⬜ | - | - |
 | 2.6 | Cron script for processing | ⬜ | - | - |
@@ -66,6 +66,6 @@
 ---
 
 ## Next Steps
-1. Реализовать Task 2.3: NewsProcessor — категоризация и теги.
-2. Добавить перевод новостей на русский язык (Task 2.4).
+1. Добавить перевод новостей на русский язык (Task 2.4).
+2. Создать ModerationService для дополнительной фильтрации (Task 2.5).
 3. Создать cron-скрипт для AI-пайплайна (Task 2.6) и обновить шаблоны (Task 2.7).

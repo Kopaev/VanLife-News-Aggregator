@@ -49,6 +49,7 @@ class NewsProcessor
 PROMPT;
 
     private array $moderationRules;
+    private array $categories;
 
     public function __construct(
         private readonly OpenAIProvider $aiProvider,
@@ -56,6 +57,7 @@ PROMPT;
         private readonly ArticleRepository $articleRepository
     ) {
         $this->moderationRules = require dirname(__DIR__, 2) . '/config/moderation.php';
+        $this->categories = require dirname(__DIR__, 2) . '/config/categories.php';
     }
 
     public function processRelevance(int $limit = 10): int
@@ -83,12 +85,15 @@ PROMPT;
         $processedAt = (new DateTimeImmutable('now'))->format('Y-m-d H:i:s');
 
         if ($this->isAutoReject($article)) {
-            $this->articleRepository->updateRelevance(
+            $this->articleRepository->updateProcessing(
                 (int)$article['id'],
                 0,
                 'rejected',
                 'auto_reject_keyword',
-                $processedAt
+                $processedAt,
+                null,
+                $this->normalizeCountry($article['country_code'] ?? null),
+                null
             );
 
             $this->logger->info('NewsProcessor', 'Article auto-rejected by keyword', [
@@ -115,21 +120,30 @@ PROMPT;
         $score = $this->normalizeScore($result['relevance_score'] ?? null);
         $isDangerous = (bool)($result['is_dangerous'] ?? false);
         $dangerReason = $result['danger_reason'] ?? null;
+        $category = $this->normalizeCategory($result['category'] ?? null);
+        $tags = $this->normalizeTags($result['tags'] ?? null);
+        $countryCode = $this->normalizeCountry($result['country_code'] ?? $article['country_code'] ?? null);
 
         [$status, $reason] = $this->determineStatus($score, $isDangerous, $dangerReason);
 
-        $this->articleRepository->updateRelevance(
+        $this->articleRepository->updateProcessing(
             (int)$article['id'],
             $score,
             $status,
             $reason,
-            $processedAt
+            $processedAt,
+            $category,
+            $countryCode,
+            $tags
         );
 
         $this->logger->info('NewsProcessor', 'Article processed for relevance', [
             'article_id' => $article['id'],
             'score' => $score,
             'status' => $status,
+            'category' => $category,
+            'country' => $countryCode,
+            'tags' => $tags,
         ]);
     }
 
@@ -181,6 +195,55 @@ PROMPT;
         }
 
         return max(0, min(100, (int)$rawScore));
+    }
+
+    private function normalizeCategory(mixed $category): ?string
+    {
+        if (!is_string($category)) {
+            return null;
+        }
+
+        $slug = strtolower(trim($category));
+
+        if (isset($this->categories[$slug])) {
+            return $slug;
+        }
+
+        return isset($this->categories['other']) ? 'other' : null;
+    }
+
+    private function normalizeCountry(mixed $countryCode): ?string
+    {
+        if (!is_string($countryCode)) {
+            return null;
+        }
+
+        $code = strtoupper(trim($countryCode));
+
+        return (strlen($code) === 2) ? $code : null;
+    }
+
+    private function normalizeTags(mixed $rawTags): ?array
+    {
+        if (!is_array($rawTags)) {
+            return null;
+        }
+
+        $tags = [];
+
+        foreach ($rawTags as $tag) {
+            if (!is_string($tag)) {
+                continue;
+            }
+
+            $normalized = trim($tag);
+
+            if ($normalized !== '') {
+                $tags[] = $normalized;
+            }
+        }
+
+        return $tags ?: null;
     }
 
     private function isAutoReject(array $article): bool

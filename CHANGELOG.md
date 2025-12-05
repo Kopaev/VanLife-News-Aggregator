@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - AI слой: `App\AI\AIProviderInterface`, `OpenAIProvider` и `AIResponse` для работы с OpenAI Chat Completions с учётом лимита запросов
 - NewsProcessor для AI-оценки релевантности статей с учётом правил модерации
+- NewsProcessor сохраняет AI-определённые категорию (`category_slug`), страну и теги статьи
 - Методы `execute` и `lastInsertId` в `Database` для корректной работы репозиториев
 - Migration runner `scripts/migrate.php` with seed loading option
 - Initial SQL migration `sql/migrations/001_init_schema.sql` with full schema and decoded URL cache
