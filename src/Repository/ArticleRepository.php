@@ -41,8 +41,8 @@ class ArticleRepository
     public function isArticleExists(string $originalUrl): bool
     {
         $hash = md5($originalUrl);
-        $count = $this->db->fetchOne('SELECT COUNT(*) FROM articles WHERE external_id = ?', [$hash]);
-        return $count > 0;
+        $result = $this->db->fetchOne('SELECT COUNT(*) as cnt FROM articles WHERE external_id = ?', [$hash]);
+        return (int)($result['cnt'] ?? 0) > 0;
     }
 
     public function getLatestArticles(int $limit = 50): array
@@ -349,10 +349,11 @@ class ArticleRepository
     ): int {
         [$whereClause, $params] = $this->buildFilterConditions($category, $country, $language, $period);
 
-        return (int)$this->db->fetchOne(
-            "SELECT COUNT(*) FROM articles a WHERE {$whereClause}",
+        $result = $this->db->fetchOne(
+            "SELECT COUNT(*) as cnt FROM articles a WHERE {$whereClause}",
             $params
         );
+        return (int)($result['cnt'] ?? 0);
     }
 
     /**

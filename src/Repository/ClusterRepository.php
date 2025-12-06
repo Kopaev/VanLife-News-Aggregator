@@ -392,10 +392,11 @@ class ClusterRepository
     ): int {
         [$whereClause, $params] = $this->buildFilterConditions($category, $country);
 
-        return (int)$this->db->fetchOne(
-            "SELECT COUNT(*) FROM clusters c WHERE {$whereClause}",
+        $result = $this->db->fetchOne(
+            "SELECT COUNT(*) as cnt FROM clusters c WHERE {$whereClause}",
             $params
         );
+        return (int)($result['cnt'] ?? 0);
     }
 
     /**
