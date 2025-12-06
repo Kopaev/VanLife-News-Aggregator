@@ -671,3 +671,4 @@ if (!function_exists('env')) {
 - 🔄 `HomeController` теперь загружает данные фильтров
 - 🔄 `ArticleRepository` и `ClusterRepository` с методами фильтрации
 - 🔄 Главная страница интегрирована с компонентом фильтров
+-
