@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- Complete homepage redesign: Implemented a new global layout with a gradient header, statistics bar, a white card-style filter panel, a two-column main content grid, and redesigned news cards.
 - Redesigned the news feed with a modern card-based layout. Each card now includes an image (or placeholder), a title linking to the original source, a summary, and a dedicated link to the internal "AI Summary" page. The layout is fully responsive.
 
 ### Added
