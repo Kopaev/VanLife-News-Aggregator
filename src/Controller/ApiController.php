@@ -73,7 +73,7 @@ class ApiController
     }
 
     /**
-     * GET /api/news?category=...&country=...&language=...&period=...&page=1&limit=20
+     * GET /api/news?category=...&country=...&language=...&period=...&sort=...&search=...&page=1&limit=20
      * Returns filtered news articles
      */
     public function news(): Response
@@ -83,6 +83,8 @@ class ApiController
         $country = $_GET['country'] ?? null;
         $language = $_GET['language'] ?? null;
         $period = $_GET['period'] ?? null; // today, week, month, all
+        $sort = $_GET['sort'] ?? 'newest'; // newest, oldest, relevance
+        $search = isset($_GET['search']) && strlen($_GET['search']) >= 2 ? $_GET['search'] : null;
         $page = max(1, (int)($_GET['page'] ?? 1));
         $limit = min(100, max(1, (int)($_GET['limit'] ?? 20)));
         $offset = ($page - 1) * $limit;
@@ -93,6 +95,8 @@ class ApiController
             country: $country,
             language: $language,
             period: $period,
+            sort: $sort,
+            search: $search,
             limit: $limit,
             offset: $offset
         );
@@ -102,7 +106,8 @@ class ApiController
             category: $category,
             country: $country,
             language: $language,
-            period: $period
+            period: $period,
+            search: $search
         );
 
         return Response::json([
@@ -118,9 +123,12 @@ class ApiController
                 'country' => $country,
                 'language' => $language,
                 'period' => $period,
+                'sort' => $sort,
+                'search' => $search,
             ],
         ]);
     }
+
 
     /**
      * GET /api/clusters?category=...&country=...&page=1&limit=20

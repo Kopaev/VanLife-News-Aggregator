@@ -303,99 +303,121 @@ class ArticleRepository
     }
 
     /**
-     * Get filtered articles with pagination
-     */
-    public function getFilteredArticles(
-        ?string $category = null,
-        ?string $country = null,
-        ?string $language = null,
-        ?string $period = null,
-        int $limit = 20,
-        int $offset = 0
-    ): array {
-        [$whereClause, $params] = $this->buildFilterConditions($category, $country, $language, $period);
-        $params[] = $limit;
-        $params[] = $offset;
+ * Get filtered articles with pagination
+ */
+public function getFilteredArticles(
+    ?string $category = null,
+    ?string $country = null,
+    ?string $language = null,
+    ?string $period = null,
+    ?string $sort = 'newest',
+    ?string $search = null,
+    int $limit = 20,
+    int $offset = 0
+): array {
+    [$whereClause, $params] = $this->buildFilterConditions($category, $country, $language, $period, $search);
+    
+    // Determine sort order
+    $orderBy = match($sort) {
+        'oldest' => 'a.published_at ASC',
+        'relevance' => 'a.ai_relevance_score DESC, a.published_at DESC',
+        default => 'a.published_at DESC'
+    };
+    
+    $params[] = $limit;
+    $params[] = $offset;
 
-        return $this->db->fetchAll(
-            "SELECT a.*,
-                    COALESCE(a.title_ru, a.original_title) AS display_title,
-                    COALESCE(a.summary_ru, a.original_summary) AS display_summary,
-                    c.name_ru AS category_name,
-                    c.icon AS category_icon,
-                    c.color AS category_color,
-                    country.name_ru AS country_name,
-                    country.flag_emoji AS country_flag,
-                    s.name AS source_name
-             FROM articles a
-             LEFT JOIN categories c ON c.slug = a.category_slug
-             LEFT JOIN countries country ON country.code = a.country_code
-             LEFT JOIN sources s ON s.id = a.source_id
-             WHERE {$whereClause}
-             ORDER BY a.published_at DESC
-             LIMIT ? OFFSET ?",
-            $params
-        );
-    }
-
-    /**
-     * Get count of filtered articles
-     */
-    public function getFilteredCount(
-        ?string $category = null,
-        ?string $country = null,
-        ?string $language = null,
-        ?string $period = null
-    ): int {
-        [$whereClause, $params] = $this->buildFilterConditions($category, $country, $language, $period);
-
-        $result = $this->db->fetchOne(
-            "SELECT COUNT(*) as cnt FROM articles a WHERE {$whereClause}",
-            $params
-        );
-        return (int)($result['cnt'] ?? 0);
-    }
+    return $this->db->fetchAll(
+        "SELECT a.*,
+                COALESCE(a.title_ru, a.original_title) AS display_title,
+                COALESCE(a.summary_ru, a.original_summary) AS display_summary,
+                c.name_ru AS category_name,
+                c.icon AS category_icon,
+                c.color AS category_color,
+                country.name_ru AS country_name,
+                country.flag_emoji AS country_flag,
+                s.name AS source_name
+         FROM articles a
+         LEFT JOIN categories c ON c.slug = a.category_slug
+         LEFT JOIN countries country ON country.code = a.country_code
+         LEFT JOIN sources s ON s.id = a.source_id
+         WHERE {$whereClause}
+         ORDER BY {$orderBy}
+         LIMIT ? OFFSET ?",
+        $params
+    );
+}
 
     /**
-     * Build WHERE clause and parameters for filtering
-     */
-    private function buildFilterConditions(
-        ?string $category,
-        ?string $country,
-        ?string $language,
-        ?string $period
-    ): array {
-        $conditions = ['a.status IN ("published", "moderation")'];
-        $params = [];
+ * Get count of filtered articles
+ */
+public function getFilteredCount(
+    ?string $category = null,
+    ?string $country = null,
+    ?string $language = null,
+    ?string $period = null,
+    ?string $search = null
+): int {
+    [$whereClause, $params] = $this->buildFilterConditions($category, $country, $language, $period, $search);
 
-        // Filter by category
-        if ($category) {
-            $conditions[] = 'a.category_slug = ?';
-            $params[] = $category;
-        }
+    $result = $this->db->fetchOne(
+        "SELECT COUNT(*) AS cnt FROM articles a WHERE {$whereClause}",
+        $params
+    );
 
-        // Filter by country
-        if ($country) {
-            $conditions[] = 'a.country_code = ?';
-            $params[] = $country;
-        }
+    return (int)($result['cnt'] ?? 0);
+}
 
-        // Filter by original language
-        if ($language) {
-            $conditions[] = 'a.original_language = ?';
-            $params[] = $language;
-        }
+    /**
+ * Build WHERE clause and parameters for filtering
+ */
+private function buildFilterConditions(
+    ?string $category,
+    ?string $country,
+    ?string $language,
+    ?string $period,
+    ?string $search = null
+): array {
+    $conditions = ['a.status IN ("published", "moderation")'];
+    $params = [];
 
-        // Filter by period
-        if ($period) {
-            $dateCondition = $this->getPeriodDateCondition($period);
-            if ($dateCondition) {
-                $conditions[] = $dateCondition;
-            }
-        }
-
-        return [implode(' AND ', $conditions), $params];
+    // Filter by category
+    if ($category) {
+        $conditions[] = 'a.category_slug = ?';
+        $params[] = $category;
     }
+
+    // Filter by country
+    if ($country) {
+        $conditions[] = 'a.country_code = ?';
+        $params[] = $country;
+    }
+
+    // Filter by original language
+    if ($language) {
+        $conditions[] = 'a.original_language = ?';
+        $params[] = $language;
+    }
+
+    // Filter by period
+    if ($period) {
+        $dateCondition = $this->getPeriodDateCondition($period);
+        if ($dateCondition) {
+            $conditions[] = $dateCondition;
+        }
+    }
+
+    // Search in title and summary
+    if ($search && strlen($search) >= 2) {
+        $conditions[] = '(a.title_ru LIKE ? OR a.original_title LIKE ? OR a.summary_ru LIKE ?)';
+        $searchTerm = '%' . $search . '%';
+        $params[] = $searchTerm;
+        $params[] = $searchTerm;
+        $params[] = $searchTerm;
+    }
+
+    return [implode(' AND ', $conditions), $params];
+}
 
     /**
      * Get date condition for period filter

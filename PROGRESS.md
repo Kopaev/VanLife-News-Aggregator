@@ -13,10 +13,12 @@
 | 7.2 | Create .env from .env.example | ✅ | 2025-12-06 | .env file was missing |
 | 7.3 | Create sources.sql seeds | ✅ | 2025-12-06 | RSS sources were not seeded to DB |
 | 7.4 | Fix fetchOne() bugs in Repositories | ✅ | 2025-12-06 | Fixed ArticleRepository, ClusterRepository |
-| 7.7 | Homepage redesign (UI overhaul) | ✅ | 2025-12-06 | Implemented new layout, header, filter panel, news cards, and sidebar |
-| 7.6 | Fix news card design | ✅ | 2025-12-06 | Updated news cards to new layout, fixed links, added image placeholders |
 | 7.5 | PHP syntax validation | ✅ | 2025-12-06 | All PHP files validated |
+| 7.6 | Fix news card design | ✅ | 2025-12-06 | Updated news cards to new layout, fixed links, added image placeholders |
+| 7.7 | Homepage redesign (UI overhaul) | ✅ | 2025-12-06 | Implemented new layout, header, filter panel, news cards, and sidebar |
 | 7.8 | Modern UI Redesign | ✅ | 2025-12-06 | Implemented a cleaner, more modern UI for the homepage and news cards. |
+| 7.9 | Full UI/Filter redesign to match screenshot | ✅ | 2025-12-06 | Gradient header, stats pills, labeled filter dropdowns, horizontal cards, events sidebar, sort/search API |
+
 
 #### PHASE 6: SEO & Production
 | # | Task | Status | Date | Notes |
@@ -103,6 +105,23 @@
 
 ## Change History
 
+### [2025-12-06] - Full UI/Filter Redesign (Task 7.9)
+**Completed:**
+- **Hero Header:** Gradient purple background, 🚐 emoji logo, "Новости Ванлайфа" title, "Путешествия и Кемпинги" subtitle, last update badge
+- **Stats Pills:** Three gradient-colored pills showing Новостей, Стран, Категорий counts
+- **Filter Panel:** Labeled select dropdowns (Страна, Категория, Language, Сортировка), search input, blue "Очистить" button
+- **News Cards:** Horizontal layout with alternating image positions (left/right), metadata badges, category tags
+- **Events Sidebar:** "Ближайшие события" widget with sample event items
+- **Backend:** Added sort (newest/oldest/relevance) and search parameters to `ArticleRepository.php` and `ApiController.php`
+- **JavaScript:** Updated `filters.js` with select handlers, debounced search, theme toggle
+
+**Files Updated:**
+- `templates/pages/home.php` - Complete rewrite
+- `public/css/style.css` - Complete rewrite
+- `public/js/filters.js` - Complete rewrite
+- `src/Repository/ArticleRepository.php` - Added sort/search support
+- `src/Controller/ApiController.php` - Added sort/search params
+
 ### [2025-12-06] - Modern UI Redesign
 **Completed:**
 - **Homepage UI Overhaul (Task 7.8):**
@@ -112,6 +131,7 @@
   - Redesigned news cards with the image on top and improved typography.
   - Added "Inter" font for better readability.
   - Updated `templates/pages/home.php` to match the new CSS structure.
+
 
 ### [2025-12-06] - PHASE 7 Bug Fixes & Audit
 **Issues Found and Fixed:**

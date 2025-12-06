@@ -10,6 +10,8 @@ class NewsFilters {
             country: null,
             language: null,
             period: null,
+            sort: 'newest',
+            search: '',
             page: 1
         };
 
@@ -29,8 +31,8 @@ class NewsFilters {
         // Bind event listeners
         this.bindEvents();
 
-        // Initial load
-        this.applyFilters();
+        // Apply initial active states
+        this.updateActiveFilters();
     }
 
     async loadFiltersData() {
@@ -45,52 +47,66 @@ class NewsFilters {
 
     parseUrlParams() {
         const params = new URLSearchParams(window.location.search);
-        this.currentFilters.category = params.get('category');
-        this.currentFilters.country = params.get('country');
-        this.currentFilters.language = params.get('language');
-        this.currentFilters.period = params.get('period');
+        this.currentFilters.category = params.get('category') || null;
+        this.currentFilters.country = params.get('country') || null;
+        this.currentFilters.language = params.get('language') || null;
+        this.currentFilters.period = params.get('period') || null;
+        this.currentFilters.sort = params.get('sort') || 'newest';
+        this.currentFilters.search = params.get('search') || '';
         this.currentFilters.page = parseInt(params.get('page') || '1', 10);
     }
 
     bindEvents() {
-        // Category filter
-        const categoryButtons = document.querySelectorAll('[data-filter-category]');
-        categoryButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const value = btn.dataset.filterCategory;
-                this.setFilter('category', value === 'all' ? null : value);
+        // Country filter (select)
+        const countrySelect = document.getElementById('filter-country');
+        if (countrySelect) {
+            countrySelect.addEventListener('change', (e) => {
+                const value = e.target.value;
+                this.setFilter('country', value || null);
             });
-        });
+        }
 
-        // Country filter
-        const countryButtons = document.querySelectorAll('[data-filter-country]');
-        countryButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const value = btn.dataset.filterCountry;
-                this.setFilter('country', value === 'all' ? null : value);
+        // Category filter (select)
+        const categorySelect = document.getElementById('filter-category');
+        if (categorySelect) {
+            categorySelect.addEventListener('change', (e) => {
+                const value = e.target.value;
+                this.setFilter('category', value || null);
             });
-        });
+        }
 
-        // Language filter
+        // Language filter (select)
         const languageSelect = document.getElementById('filter-language');
         if (languageSelect) {
             languageSelect.addEventListener('change', (e) => {
                 const value = e.target.value;
-                this.setFilter('language', value === 'all' ? null : value);
+                this.setFilter('language', value || null);
             });
         }
 
-        // Period filter
-        const periodButtons = document.querySelectorAll('[data-filter-period]');
-        periodButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const value = btn.dataset.filterPeriod;
-                this.setFilter('period', value === 'all' ? null : value);
+        // Sort filter (select)
+        const sortSelect = document.getElementById('filter-sort');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', (e) => {
+                const value = e.target.value;
+                this.setFilter('sort', value || 'newest');
             });
-        });
+        }
+
+        // Search input
+        const searchInput = document.getElementById('filter-search');
+        if (searchInput) {
+            let searchTimeout;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    this.setFilter('search', e.target.value.trim() || '');
+                }, 500); // Debounce search
+            });
+            
+            // Set initial value from URL
+            searchInput.value = this.currentFilters.search;
+        }
 
         // Clear filters button
         const clearBtn = document.getElementById('clear-filters');
@@ -101,6 +117,31 @@ class NewsFilters {
             });
         }
 
+        // Legacy button-based filters (for backwards compatibility)
+        document.querySelectorAll('[data-filter-category]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const value = btn.dataset.filterCategory;
+                this.setFilter('category', value === 'all' ? null : value);
+            });
+        });
+
+        document.querySelectorAll('[data-filter-country]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const value = btn.dataset.filterCountry;
+                this.setFilter('country', value === 'all' ? null : value);
+            });
+        });
+
+        document.querySelectorAll('[data-filter-period]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const value = btn.dataset.filterPeriod;
+                this.setFilter('period', value === 'all' ? null : value);
+            });
+        });
+
         // Pagination
         document.addEventListener('click', (e) => {
             if (e.target.matches('[data-page]')) {
@@ -108,6 +149,13 @@ class NewsFilters {
                 const page = parseInt(e.target.dataset.page, 10);
                 this.setPage(page);
             }
+        });
+
+        // Browser back/forward
+        window.addEventListener('popstate', () => {
+            this.parseUrlParams();
+            this.updateActiveFilters();
+            this.loadNews();
         });
     }
 
@@ -128,8 +176,24 @@ class NewsFilters {
             country: null,
             language: null,
             period: null,
+            sort: 'newest',
+            search: '',
             page: 1
         };
+        
+        // Reset form elements
+        const countrySelect = document.getElementById('filter-country');
+        const categorySelect = document.getElementById('filter-category');
+        const languageSelect = document.getElementById('filter-language');
+        const sortSelect = document.getElementById('filter-sort');
+        const searchInput = document.getElementById('filter-search');
+        
+        if (countrySelect) countrySelect.value = '';
+        if (categorySelect) categorySelect.value = '';
+        if (languageSelect) languageSelect.value = '';
+        if (sortSelect) sortSelect.value = 'newest';
+        if (searchInput) searchInput.value = '';
+        
         this.applyFilters();
     }
 
@@ -161,6 +225,12 @@ class NewsFilters {
         if (this.currentFilters.period) {
             params.set('period', this.currentFilters.period);
         }
+        if (this.currentFilters.sort && this.currentFilters.sort !== 'newest') {
+            params.set('sort', this.currentFilters.sort);
+        }
+        if (this.currentFilters.search) {
+            params.set('search', this.currentFilters.search);
+        }
         if (this.currentFilters.page > 1) {
             params.set('page', this.currentFilters.page.toString());
         }
@@ -173,7 +243,26 @@ class NewsFilters {
     }
 
     updateActiveFilters() {
-        // Update category buttons
+        // Update select elements
+        const countrySelect = document.getElementById('filter-country');
+        const categorySelect = document.getElementById('filter-category');
+        const languageSelect = document.getElementById('filter-language');
+        const sortSelect = document.getElementById('filter-sort');
+        
+        if (countrySelect) {
+            countrySelect.value = this.currentFilters.country || '';
+        }
+        if (categorySelect) {
+            categorySelect.value = this.currentFilters.category || '';
+        }
+        if (languageSelect) {
+            languageSelect.value = this.currentFilters.language || '';
+        }
+        if (sortSelect) {
+            sortSelect.value = this.currentFilters.sort || 'newest';
+        }
+
+        // Update legacy button states
         document.querySelectorAll('[data-filter-category]').forEach(btn => {
             const value = btn.dataset.filterCategory;
             const isActive = (value === 'all' && !this.currentFilters.category)
@@ -181,7 +270,6 @@ class NewsFilters {
             btn.classList.toggle('active', isActive);
         });
 
-        // Update country buttons
         document.querySelectorAll('[data-filter-country]').forEach(btn => {
             const value = btn.dataset.filterCountry;
             const isActive = (value === 'all' && !this.currentFilters.country)
@@ -189,13 +277,6 @@ class NewsFilters {
             btn.classList.toggle('active', isActive);
         });
 
-        // Update language select
-        const languageSelect = document.getElementById('filter-language');
-        if (languageSelect) {
-            languageSelect.value = this.currentFilters.language || 'all';
-        }
-
-        // Update period buttons
         document.querySelectorAll('[data-filter-period]').forEach(btn => {
             const value = btn.dataset.filterPeriod;
             const isActive = (value === 'all' && !this.currentFilters.period)
@@ -203,14 +284,14 @@ class NewsFilters {
             btn.classList.toggle('active', isActive);
         });
 
-        // Show/hide clear button
-        const hasActiveFilters = this.currentFilters.category
-                              || this.currentFilters.country
-                              || this.currentFilters.language
-                              || this.currentFilters.period;
-        const clearBtn = document.getElementById('clear-filters');
-        if (clearBtn) {
-            clearBtn.style.display = hasActiveFilters ? 'inline-block' : 'none';
+        // Update total count if available
+        this.updateTotalCount();
+    }
+
+    updateTotalCount(total) {
+        const countElement = document.querySelector('.total-count strong');
+        if (countElement && typeof total === 'number') {
+            countElement.textContent = `${total} Новостей`;
         }
     }
 
@@ -224,6 +305,8 @@ class NewsFilters {
             if (this.currentFilters.country) params.set('country', this.currentFilters.country);
             if (this.currentFilters.language) params.set('language', this.currentFilters.language);
             if (this.currentFilters.period) params.set('period', this.currentFilters.period);
+            if (this.currentFilters.sort) params.set('sort', this.currentFilters.sort);
+            if (this.currentFilters.search) params.set('search', this.currentFilters.search);
             params.set('page', this.currentFilters.page.toString());
             params.set('limit', '20');
 
@@ -238,12 +321,15 @@ class NewsFilters {
             // Render pagination
             this.renderPagination(data.pagination);
 
+            // Update total count
+            this.updateTotalCount(data.pagination?.total);
+
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
         } catch (error) {
             console.error('Error loading news:', error);
-            this.showError('Ошибка загрузки новостей');
+            this.showError('Ошибка загрузки новостей. Попробуйте обновить страницу.');
         } finally {
             this.isLoading = false;
             this.hideLoading();
@@ -254,46 +340,106 @@ class NewsFilters {
         const container = document.getElementById('news-container');
         if (!container) return;
 
-        if (articles.length === 0) {
-            container.innerHTML = '<p class="no-results">Новости не найдены</p>';
+        if (!articles || articles.length === 0) {
+            container.innerHTML = `
+                <div class="no-results-card">
+                    <p>Новости не найдены</p>
+                    <p>Попробуйте изменить параметры фильтрации</p>
+                </div>
+            `;
             return;
         }
 
-        container.innerHTML = articles.map(article => this.renderArticleCard(article)).join('');
+        container.innerHTML = articles.map((article, index) => this.renderArticleCard(article, index)).join('');
     }
 
-    renderArticleCard(article) {
-        const displayTitle = article.display_title || article.original_title;
-        const displaySummary = article.display_summary || article.original_summary || '';
-        const categoryBadge = article.category_name
-            ? `<span class="badge" style="background-color: ${article.category_color || '#666'}">${article.category_icon || ''} ${article.category_name}</span>`
-            : '';
-        const countryBadge = article.country_flag
-            ? `<span class="country">${article.country_flag} ${article.country_name || article.country_code}</span>`
-            : '';
+    renderArticleCard(article, index) {
+        const displayTitle = article.display_title || article.title_ru || article.original_title || 'Без заголовка';
+        const displaySummary = article.display_summary || article.summary_ru || article.original_summary || '';
+        const truncatedSummary = displaySummary.length > 300 
+            ? displaySummary.substring(0, 300) + '...' 
+            : displaySummary;
+        
+        const categoryColor = article.category_color || '#8B5CF6';
+        const categoryName = article.category_name || '';
+        const countryFlag = article.country_flag || '';
+        const countryName = article.country_name || '';
+        const langCode = (article.original_language || '').toUpperCase();
+        const imageUrl = article.image_url || '/images/placeholders/placeholder.svg';
+        const sourceName = this.getSourceName(article.original_url || '');
+        const cardClass = index % 2 === 0 ? 'card-left' : 'card-right';
 
         return `
-            <article class="news-card">
-                <div class="news-meta">
-                    ${categoryBadge}
-                    ${countryBadge}
-                    <span class="status status-${article.status}">${this.getStatusText(article.status)}</span>
+            <article class="news-card ${cardClass}">
+                <div class="news-card-image-wrapper">
+                    <img src="${imageUrl}" 
+                         alt="${this.escapeHtml(displayTitle)}" 
+                         class="news-card-image" 
+                         loading="lazy"
+                         onerror="this.src='/images/placeholders/placeholder.svg'">
                 </div>
-                <h2><a href="/news/${article.slug}">${displayTitle}</a></h2>
-                <p class="news-summary">${displaySummary.substring(0, 200)}${displaySummary.length > 200 ? '...' : ''}</p>
-                <div class="news-footer">
-                    <time datetime="${article.published_at}">${this.formatDate(article.published_at)}</time>
-                    <span class="source">${article.source_name || ''}</span>
+                <div class="news-card-content">
+                    <div class="news-card-meta">
+                        ${countryFlag || countryName ? `
+                        <span class="meta-item country-meta">
+                            <span class="flag-icon">${this.escapeHtml(countryFlag)}</span>
+                            ${this.escapeHtml(countryName)}
+                        </span>
+                        ` : ''}
+                        ${langCode ? `<span class="meta-item lang-badge">${this.escapeHtml(langCode)}</span>` : ''}
+                        <span class="meta-item date-meta">
+                            📅 ${this.formatDate(article.published_at)}
+                        </span>
+                    </div>
+
+                    ${categoryName ? `
+                    <span class="category-tag" style="background-color: ${categoryColor}">
+                        ${this.escapeHtml(categoryName)}
+                    </span>
+                    ` : ''}
+
+                    <h2 class="news-card-title">
+                        ${this.escapeHtml(displayTitle)}
+                    </h2>
+
+                    <p class="news-card-summary">
+                        ${this.escapeHtml(truncatedSummary)}
+                    </p>
+
+                    <div class="news-card-footer">
+                        <a href="${this.escapeHtml(article.original_url || '#')}" 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           class="source-link">
+                            🔗 ${this.escapeHtml(sourceName)}, inoreader.com ↗
+                        </a>
+                    </div>
                 </div>
             </article>
         `;
+    }
+
+    getSourceName(url) {
+        try {
+            const host = new URL(url).hostname;
+            return host.startsWith('www.') ? host.substring(4) : host;
+        } catch {
+            return 'источник';
+        }
+    }
+
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     renderPagination(pagination) {
         const container = document.getElementById('pagination-container');
         if (!container) return;
 
-        if (pagination.pages <= 1) {
+        if (!pagination || pagination.pages <= 1) {
             container.innerHTML = '';
             return;
         }
@@ -350,45 +496,66 @@ class NewsFilters {
     showError(message) {
         const container = document.getElementById('news-container');
         if (container) {
-            container.innerHTML = `<p class="error">${message}</p>`;
+            container.innerHTML = `
+                <div class="no-results-card">
+                    <p>${this.escapeHtml(message)}</p>
+                </div>
+            `;
         }
     }
 
-    getStatusText(status) {
-        const statusMap = {
-            'published': 'Опубликовано',
-            'moderation': 'На модерации',
-            'new': 'Новая',
-            'rejected': 'Отклонено'
-        };
-        return statusMap[status] || status;
-    }
-
     formatDate(dateString) {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffMs = now - date;
-        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        if (!dateString) return 'дата не указана';
+        
+        try {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-        if (diffHours < 1) return 'Только что';
-        if (diffHours < 24) return `${diffHours} ч. назад`;
-        if (diffDays === 1) return 'Вчера';
-        if (diffDays < 7) return `${diffDays} дн. назад`;
+            if (diffHours < 1) return 'Только что';
+            if (diffHours < 24) return `${diffHours} ч. назад`;
+            if (diffDays === 1) return 'Вчера';
+            if (diffDays < 7) return `${diffDays} дн. назад`;
 
-        return date.toLocaleDateString('ru-RU', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
+            const months = ['янв.', 'фев.', 'мар.', 'апр.', 'мая', 'июн.', 
+                           'июл.', 'авг.', 'сен.', 'окт.', 'ноя.', 'дек.'];
+            return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()} г.`;
+        } catch {
+            return 'неверная дата';
+        }
     }
+}
+
+// Theme toggle functionality
+function initThemeToggle() {
+    const toggle = document.getElementById('theme-toggle');
+    if (!toggle) return;
+
+    // Get saved theme or default to system preference
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    
+    document.documentElement.setAttribute('data-theme', initialTheme);
+
+    toggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    });
 }
 
 // Initialize on DOM ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         window.newsFilters = new NewsFilters();
+        initThemeToggle();
     });
 } else {
     window.newsFilters = new NewsFilters();
+    initThemeToggle();
 }
