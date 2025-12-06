@@ -13,7 +13,7 @@
 | 7.2 | Create .env from .env.example | ✅ | 2025-12-06 | .env file was missing |
 | 7.3 | Create sources.sql seeds | ✅ | 2025-12-06 | RSS sources were not seeded to DB |
 | 7.4 | Fix fetchOne() bugs in Repositories | ✅ | 2025-12-06 | Fixed ArticleRepository, ClusterRepository |
-| 7.7 | Homepage redesign (UI overhaul) | ✅ | 2025-12-06 | Implemented new Hero section, modern card design, improved filter panel, and vibrant color palette |
+| 7.7 | Homepage redesign (UI overhaul) | ✅ | 2025-12-06 | Implemented new layout, header, filter panel, news cards, and sidebar |
 | 7.6 | Fix news card design | ✅ | 2025-12-06 | Updated news cards to new layout, fixed links, added image placeholders |
 | 7.5 | PHP syntax validation | ✅ | 2025-12-06 | All PHP files validated |
 | 7.8 | Modern UI Redesign | ✅ | 2025-12-06 | Implemented a cleaner, more modern UI for the homepage and news cards. |

@@ -35,14 +35,7 @@ class HomeController
         // Configure SEO for home page
         $this->seoService->configureForHome();
 
-        // Separate featured article (first one)
-        $featuredArticle = null;
-        if (!empty($articles)) {
-            $featuredArticle = array_shift($articles);
-        }
-
         return Response::view('pages/home', [
-            'featuredArticle' => $featuredArticle,
             'articles' => $articles,
             'clusters' => $clusters,
             'categories' => $filtersData['categories'],
