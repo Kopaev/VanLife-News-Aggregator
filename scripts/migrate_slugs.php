@@ -46,21 +46,18 @@ echo "Mode: " . ($dryRun ? "DRY RUN (no changes will be made)" : "LIVE") . "\n";
 echo "Batch limit: {$limit}\n\n";
 
 try {
-    // Initialize database
-    $config = new Config(dirname(__DIR__) . '/config');
-    $db = new Database(
-        getenv('DB_HOST') ?: 'localhost',
-        getenv('DB_NAME') ?: 'vanlife_news',
-        getenv('DB_USER') ?: 'root',
-        getenv('DB_PASS') ?: ''
-    );
+    // Initialize config and database
+    $basePath = dirname(__DIR__);
+    $config = Config::loadDefault($basePath);
+    $db = new Database($config);
 
     $articleRepo = new ArticleRepository($db);
 
     // Count total articles without slugs
-    $totalCount = (int)$db->fetchOne(
-        'SELECT COUNT(*) FROM articles WHERE slug IS NULL OR slug = ""'
+    $countRow = $db->fetchOne(
+        'SELECT COUNT(*) AS cnt FROM articles WHERE slug IS NULL OR slug = ""'
     );
+    $totalCount = (int)($countRow['cnt'] ?? 0);
 
     echo "Total articles without slugs: {$totalCount}\n";
 
