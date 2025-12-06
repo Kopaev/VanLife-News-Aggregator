@@ -16,6 +16,7 @@
 | 7.7 | Homepage redesign (UI overhaul) | ✅ | 2025-12-06 | Implemented new layout, header, filter panel, news cards, and sidebar |
 | 7.6 | Fix news card design | ✅ | 2025-12-06 | Updated news cards to new layout, fixed links, added image placeholders |
 | 7.5 | PHP syntax validation | ✅ | 2025-12-06 | All PHP files validated |
+| 7.8 | Modern UI Redesign | ✅ | 2025-12-06 | Implemented a cleaner, more modern UI for the homepage and news cards. |
 
 #### PHASE 6: SEO & Production
 | # | Task | Status | Date | Notes |
@@ -101,6 +102,16 @@
 ---
 
 ## Change History
+
+### [2025-12-06] - Modern UI Redesign
+**Completed:**
+- **Homepage UI Overhaul (Task 7.8):**
+  - Replaced the entire `public/css/style.css` with a new, modern design.
+  - Introduced a clean, grid-based layout for news cards.
+  - Simplified the main header for a minimalist look.
+  - Redesigned news cards with the image on top and improved typography.
+  - Added "Inter" font for better readability.
+  - Updated `templates/pages/home.php` to match the new CSS structure.
 
 ### [2025-12-06] - PHASE 7 Bug Fixes & Audit
 **Issues Found and Fixed:**

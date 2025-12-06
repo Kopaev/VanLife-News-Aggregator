@@ -23,6 +23,7 @@
 ## ✨ Возможности
 
 ### Реализовано
+- [x] Современный и чистый пользовательский интерфейс с адаптивным дизайном.
 - [x] Сбор новостей из Google News RSS (20+ языков)
 - [x] Декодирование Google News URL в оригинальные ссылки с кешированием
 - [x] Базовая структура фронтенда с выводом новостей
@@ -629,6 +630,9 @@ if (!function_exists('env')) {
 ## 📝 Changelog
 
 История изменений ведётся в файле [CHANGELOG.md](CHANGELOG.md).
+
+### [2025-12-06] - Modern UI Redesign
+- ✨ **UI Overhaul:** Implemented a completely new, modern, and clean user interface for the homepage and news cards. The new design uses a grid layout, improved typography, and a minimalist aesthetic for better user experience.
 
 ### Последние изменения
 
