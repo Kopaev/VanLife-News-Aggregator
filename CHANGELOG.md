@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Redesigned the news feed with a modern card-based layout. Each card now includes an image (or placeholder), a title linking to the original source, a summary, and a dedicated link to the internal "AI Summary" page. The layout is fully responsive.
+
 ### Added
 - AI слой: `App\AI\AIProviderInterface`, `OpenAIProvider` и `AIResponse` для работы с OpenAI Chat Completions с учётом лимита запросов
 - NewsProcessor для AI-оценки релевантности статей с учётом правил модерации

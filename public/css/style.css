@@ -424,3 +424,121 @@ footer {
         align-items: flex-start;
     }
 }
+
+/* New News Card Styles */
+.news-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.news-card {
+    background-color: var(--card-background);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    transition: box-shadow 0.3s ease;
+}
+
+.news-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.news-card-image {
+    flex-shrink: 0;
+    width: 200px;
+    height: auto;
+}
+
+.news-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.news-card-content {
+    padding: 1rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.news-card-header {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.country-badge {
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    background-color: rgba(0,0,0,0.05);
+    color: var(--text-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.news-card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0.25rem 0;
+}
+
+.news-card-title a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.news-card-title a:hover {
+    color: var(--primary-color);
+}
+
+.news-card-summary {
+    font-size: 0.95rem;
+    color: var(--muted-color);
+    flex-grow: 1;
+    margin: 0.5rem 0;
+}
+
+.news-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--muted-color);
+}
+
+.read-more-link {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.read-more-link:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .news-card {
+        flex-direction: column;
+    }
+
+    .news-card-image {
+        width: 100%;
+        height: 180px;
+    }
+}
+
+/* Replace old articles class */
+.articles {
+    display: none; /* Hide old grid if it reappears */
+}
+
+.article-card {
+    display: none; /* Hide old cards if they reappear */
+}

@@ -99,80 +99,52 @@ $statusMap = [
 
     <h2 class="section-title">Все новости</h2>
 
-    <div id="news-container" class="articles">
+    <div id="news-container" class="news-grid">
         <?php if (empty($articles)): ?>
             <p>Пока нет опубликованных новостей.</p>
         <?php else: ?>
             <?php foreach ($articles as $article): ?>
                 <?php
                 $tags = $decodeTags($article['tags'] ?? null);
-                $status = $statusMap[$article['status'] ?? 'new'] ?? ['label' => 'Статус неизвестен', 'class' => 'status--new'];
-                $language = strtoupper((string)($article['original_language'] ?? '')); 
+                $language = strtoupper((string)($article['original_language'] ?? ''));
+                $placeholder = '/images/placeholders/placeholder.svg';
+                $imageUrl = !empty($article['image_url']) ? htmlspecialchars($article['image_url']) : $placeholder;
                 ?>
-                <div class="article-card">
-                    <div class="article-meta-top">
-                        <?php if (!empty($article['category_name'])): ?>
-                            <span class="badge category-badge" <?php if (!empty($article['category_color'])): ?>style="background-color: <?php echo htmlspecialchars($article['category_color']); ?>"<?php endif; ?>>
-                                <?php echo htmlspecialchars(trim(($article['category_icon'] ?? '') . ' ' . $article['category_name'])); ?>
-                            </span>
-                        <?php endif; ?>
-
-                        <div class="pill-group">
+                <div class="news-card">
+                    <div class="news-card-image">
+                        <img src="<?php echo $imageUrl; ?>" alt="<?php echo htmlspecialchars($article['display_title'] ?? $article['original_title']); ?>" loading="lazy">
+                    </div>
+                    <div class="news-card-content">
+                        <div class="news-card-header">
                             <?php if (!empty($article['country_name'])): ?>
-                                <span class="pill">
+                                <span class="badge country-badge">
                                     <?php echo htmlspecialchars(trim(($article['country_flag'] ?? '') . ' ' . $article['country_name'])); ?>
                                 </span>
                             <?php endif; ?>
-                            <span class="pill status <?php echo htmlspecialchars($status['class']); ?>">
-                                <?php echo htmlspecialchars($status['label']); ?>
-                            </span>
+                            <?php if (!empty($article['category_name'])): ?>
+                                <span class="badge category-badge" <?php if (!empty($article['category_color'])): ?>style="background-color: <?php echo htmlspecialchars($article['category_color']); ?>"<?php endif; ?>>
+                                    <?php echo htmlspecialchars(trim(($article['category_icon'] ?? '') . ' ' . $article['category_name'])); ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <h3 class="news-card-title">
+                            <a href="<?php echo htmlspecialchars($article['original_url']); ?>" target="_blank" rel="noopener noreferrer">
+                                <?php echo htmlspecialchars($article['display_title'] ?? $article['original_title']); ?>
+                            </a>
+                        </h3>
+
+                        <p class="news-card-summary">
+                            <?php echo htmlspecialchars($article['display_summary'] ?? 'Описание появится после обработки.'); ?>
+                        </p>
+
+                        <div class="news-card-footer">
+                            <span class="news-card-date"><?php echo htmlspecialchars($formatDate($article['published_at'] ?? null)); ?></span>
+                            <?php if (!empty($article['slug'])): ?>
+                                <a href="/news/<?php echo htmlspecialchars($article['slug']); ?>" class="read-more-link">AI Cаммари &rarr;</a>
+                            <?php endif; ?>
                         </div>
                     </div>
-
-                    <?php if (!empty($article['slug'])): ?>
-                        <h2><a href="/news/<?php echo htmlspecialchars($article['slug']); ?>"><?php echo htmlspecialchars($article['display_title'] ?? $article['original_title']); ?></a></h2>
-                    <?php else: ?>
-                        <h2><?php echo htmlspecialchars($article['display_title'] ?? $article['original_title']); ?></h2>
-                    <?php endif; ?>
-
-                    <p class="article-summary">
-                        <?php echo htmlspecialchars($article['display_summary'] ?? 'Описание появится после обработки.'); ?>
-                    </p>
-
-                    <div class="article-meta">
-                        <div>
-                            <span class="meta-label">Опубликовано:</span>
-                            <span><?php echo htmlspecialchars($formatDate($article['published_at'] ?? null)); ?></span>
-                        </div>
-                        <div>
-                            <span class="meta-label">Источник:</span>
-                            <a href="<?php echo htmlspecialchars($article['original_url']); ?>" target="_blank" rel="noopener">Открыть оригинал</a>
-                        </div>
-                        <div>
-                            <span class="meta-label">Язык оригинала:</span>
-                            <span><?php echo $language ?: '—'; ?></span>
-                        </div>
-                        <?php if (!empty($article['ai_relevance_score'])): ?>
-                            <div>
-                                <span class="meta-label">Релевантность AI:</span>
-                                <span><?php echo (int)$article['ai_relevance_score']; ?> / 100</span>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-
-                    <?php if (!empty($tags)): ?>
-                        <div class="tag-list">
-                            <?php foreach ($tags as $tag): ?>
-                                <span class="tag">#<?php echo htmlspecialchars($tag); ?></span>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if (!empty($article['slug'])): ?>
-                        <div class="article-actions">
-                            <a href="/news/<?php echo htmlspecialchars($article['slug']); ?>" class="button button--small">Читать далее</a>
-                        </div>
-                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
