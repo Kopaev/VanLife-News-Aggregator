@@ -48,6 +48,39 @@ $currentFilters = $currentFilters ?? [];
         </div>
     </header>
 
+    <!-- Hero Section -->
+    <?php if (!empty($featuredArticle)): ?>
+    <section class="hero-section">
+        <div class="hero-card">
+            <div class="hero-image-wrapper">
+                <img src="<?php echo !empty($featuredArticle['image_url']) ? htmlspecialchars($featuredArticle['image_url']) : '/images/placeholders/placeholder.svg'; ?>" alt="<?php echo htmlspecialchars($featuredArticle['display_title']); ?>" class="hero-image">
+                <span class="category-badge hero-badge"><?php echo htmlspecialchars($featuredArticle['category_name'] ?? 'Главное'); ?></span>
+            </div>
+            <div class="hero-content">
+                <div class="hero-meta">
+                    <span class="meta-item country-meta">
+                        <?php echo htmlspecialchars($featuredArticle['country_flag'] ?? '🌍'); ?> <?php echo htmlspecialchars($featuredArticle['country_name'] ?? 'Мир'); ?>
+                    </span>
+                    <span class="meta-item date-meta">
+                        <?php echo $formatDate($featuredArticle['published_at']); ?>
+                    </span>
+                </div>
+                <h2 class="hero-title">
+                    <a href="/news/<?php echo htmlspecialchars($featuredArticle['slug']); ?>" class="hero-link">
+                        <?php echo htmlspecialchars($featuredArticle['display_title']); ?>
+                    </a>
+                </h2>
+                <p class="hero-summary">
+                    <?php echo htmlspecialchars($featuredArticle['display_summary'] ?? ''); ?>
+                </p>
+                <div class="hero-footer">
+                    <a href="/news/<?php echo htmlspecialchars($featuredArticle['slug']); ?>" class="button button-primary">Читать далее</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
     <!-- Filter Panel -->
     <div class="filter-panel">
         <form class="filter-form" id="news-filters">
@@ -103,7 +136,7 @@ $currentFilters = $currentFilters ?? [];
     <!-- Main Content Grid -->
     <div class="main-content-grid">
         <main class="news-column" id="news-container">
-            <?php if (empty($articles)): ?>
+            <?php if (empty($articles) && empty($featuredArticle)): ?>
                 <div class="no-results-card">
                     <p>Новости по вашим фильтрам не найдены.</p>
                     <p>Попробуйте изменить или сбросить фильтры.</p>
@@ -120,16 +153,15 @@ $currentFilters = $currentFilters ?? [];
                                 <span class="meta-item country-meta">
                                     <?php echo htmlspecialchars($article['country_flag'] ?? '🌍'); ?> <?php echo htmlspecialchars($article['country_name'] ?? 'Мир'); ?>
                                 </span>
-                                <span class="meta-item lang-meta">
-                                    <?php echo strtoupper(htmlspecialchars($article['original_language'] ?? '')); ?>
-                                </span>
                                 <span class="meta-item date-meta">
                                     <?php echo $formatDate($article['published_at']); ?>
                                 </span>
                             </div>
 
                             <h2 class="news-card-title">
-                                <?php echo htmlspecialchars($article['display_title']); ?>
+                                <a href="/news/<?php echo htmlspecialchars($article['slug']); ?>" class="card-title-link">
+                                    <?php echo htmlspecialchars($article['display_title']); ?>
+                                </a>
                             </h2>
 
                             <p class="news-card-summary">
@@ -137,10 +169,10 @@ $currentFilters = $currentFilters ?? [];
                             </p>
 
                             <div class="news-card-footer">
-                                <a href="<?php echo htmlspecialchars($article['original_url']); ?>" class="footer-link source-link" target="_blank" rel="noopener">Источник</a>
-                                <?php if(!empty($article['slug'])): ?>
-                                <a href="/news/<?php echo htmlspecialchars($article['slug']); ?>" class="footer-link summary-link">Читать</a>
-                                <?php endif; ?>
+                                <span class="meta-item lang-meta">
+                                    <?php echo strtoupper(htmlspecialchars($article['original_language'] ?? '')); ?>
+                                </span>
+                                <a href="/news/<?php echo htmlspecialchars($article['slug']); ?>" class="footer-link read-more-link">Читать</a>
                             </div>
                         </div>
                     </article>
@@ -148,13 +180,40 @@ $currentFilters = $currentFilters ?? [];
             <?php endif; ?>
         </main>
         <aside class="sidebar-column">
+            <?php if (!empty($clusters)): ?>
+            <div class="sidebar-widget">
+                <h3 class="sidebar-title">Популярные темы</h3>
+                <div class="sidebar-content">
+                     <ul class="clusters-list">
+                        <?php foreach ($clusters as $cluster): ?>
+                        <li class="cluster-item">
+                            <a href="/clusters/<?php echo htmlspecialchars($cluster['slug']); ?>" class="cluster-link">
+                                <span class="cluster-title"><?php echo htmlspecialchars($cluster['title_ru']); ?></span>
+                                <span class="cluster-count"><?php echo $cluster['articles_count']; ?> статей</span>
+                            </a>
+                        </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            </div>
+            <?php endif; ?>
+
             <div class="sidebar-widget">
                 <h3 class="sidebar-title">Ближайшие события</h3>
                 <div class="sidebar-content">
-                     <ul>
-                        <li>Caravan Salon Düsseldorf (Август)</li>
-                        <li>The Motorhome & Caravan Show (Октябрь)</li>
-                        <li>Salone del Camper (Сентябрь)</li>
+                     <ul class="events-list">
+                        <li>
+                            <span class="event-date">Август 2025</span>
+                            <span class="event-name">Caravan Salon Düsseldorf</span>
+                        </li>
+                        <li>
+                            <span class="event-date">Сентябрь 2025</span>
+                            <span class="event-name">Salone del Camper</span>
+                        </li>
+                        <li>
+                            <span class="event-date">Октябрь 2025</span>
+                            <span class="event-name">Motorhome & Caravan Show</span>
+                        </li>
                     </ul>
                 </div>
             </div>
