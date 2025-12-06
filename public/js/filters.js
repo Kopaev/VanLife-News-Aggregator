@@ -103,7 +103,7 @@ class NewsFilters {
                     this.setFilter('search', e.target.value.trim() || '');
                 }, 500); // Debounce search
             });
-            
+
             // Set initial value from URL
             searchInput.value = this.currentFilters.search;
         }
@@ -180,20 +180,20 @@ class NewsFilters {
             search: '',
             page: 1
         };
-        
+
         // Reset form elements
         const countrySelect = document.getElementById('filter-country');
         const categorySelect = document.getElementById('filter-category');
         const languageSelect = document.getElementById('filter-language');
         const sortSelect = document.getElementById('filter-sort');
         const searchInput = document.getElementById('filter-search');
-        
+
         if (countrySelect) countrySelect.value = '';
         if (categorySelect) categorySelect.value = '';
         if (languageSelect) languageSelect.value = '';
         if (sortSelect) sortSelect.value = 'newest';
         if (searchInput) searchInput.value = '';
-        
+
         this.applyFilters();
     }
 
@@ -248,7 +248,7 @@ class NewsFilters {
         const categorySelect = document.getElementById('filter-category');
         const languageSelect = document.getElementById('filter-language');
         const sortSelect = document.getElementById('filter-sort');
-        
+
         if (countrySelect) {
             countrySelect.value = this.currentFilters.country || '';
         }
@@ -266,21 +266,21 @@ class NewsFilters {
         document.querySelectorAll('[data-filter-category]').forEach(btn => {
             const value = btn.dataset.filterCategory;
             const isActive = (value === 'all' && !this.currentFilters.category)
-                          || (value === this.currentFilters.category);
+                || (value === this.currentFilters.category);
             btn.classList.toggle('active', isActive);
         });
 
         document.querySelectorAll('[data-filter-country]').forEach(btn => {
             const value = btn.dataset.filterCountry;
             const isActive = (value === 'all' && !this.currentFilters.country)
-                          || (value === this.currentFilters.country);
+                || (value === this.currentFilters.country);
             btn.classList.toggle('active', isActive);
         });
 
         document.querySelectorAll('[data-filter-period]').forEach(btn => {
             const value = btn.dataset.filterPeriod;
             const isActive = (value === 'all' && !this.currentFilters.period)
-                          || (value === this.currentFilters.period);
+                || (value === this.currentFilters.period);
             btn.classList.toggle('active', isActive);
         });
 
@@ -356,10 +356,10 @@ class NewsFilters {
     renderArticleCard(article, index) {
         const displayTitle = article.display_title || article.title_ru || article.original_title || 'Без заголовка';
         const displaySummary = article.display_summary || article.summary_ru || article.original_summary || '';
-        const truncatedSummary = displaySummary.length > 300 
-            ? displaySummary.substring(0, 300) + '...' 
+        const truncatedSummary = displaySummary.length > 300
+            ? displaySummary.substring(0, 300) + '...'
             : displaySummary;
-        
+
         const categoryColor = article.category_color || '#8B5CF6';
         const categoryName = article.category_name || '';
         const countryFlag = article.country_flag || '';
@@ -506,7 +506,7 @@ class NewsFilters {
 
     formatDate(dateString) {
         if (!dateString) return 'дата не указана';
-        
+
         try {
             const date = new Date(dateString);
             const now = new Date();
@@ -519,8 +519,8 @@ class NewsFilters {
             if (diffDays === 1) return 'Вчера';
             if (diffDays < 7) return `${diffDays} дн. назад`;
 
-            const months = ['янв.', 'фев.', 'мар.', 'апр.', 'мая', 'июн.', 
-                           'июл.', 'авг.', 'сен.', 'окт.', 'ноя.', 'дек.'];
+            const months = ['янв.', 'фев.', 'мар.', 'апр.', 'мая', 'июн.',
+                'июл.', 'авг.', 'сен.', 'окт.', 'ноя.', 'дек.'];
             return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()} г.`;
         } catch {
             return 'неверная дата';
@@ -537,16 +537,45 @@ function initThemeToggle() {
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
-    
+
     document.documentElement.setAttribute('data-theme', initialTheme);
 
     toggle.addEventListener('click', () => {
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        
+
         document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
     });
+}
+
+// Layout toggle functionality (list/grid view)
+function initLayoutToggle() {
+    const container = document.getElementById('news-container');
+    const listBtn = document.getElementById('layout-list');
+    const gridBtn = document.getElementById('layout-grid');
+
+    if (!container || !listBtn || !gridBtn) return;
+
+    // Get saved layout or default to grid
+    const savedLayout = localStorage.getItem('newsLayout') || 'grid';
+    setLayout(savedLayout);
+
+    listBtn.addEventListener('click', () => setLayout('list'));
+    gridBtn.addEventListener('click', () => setLayout('grid'));
+
+    function setLayout(layout) {
+        container.classList.remove('layout-list', 'layout-grid');
+        container.classList.add(`layout-${layout}`);
+        container.dataset.layout = layout;
+
+        // Update button states
+        listBtn.classList.toggle('active', layout === 'list');
+        gridBtn.classList.toggle('active', layout === 'grid');
+
+        // Save preference
+        localStorage.setItem('newsLayout', layout);
+    }
 }
 
 // Initialize on DOM ready
@@ -554,8 +583,10 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         window.newsFilters = new NewsFilters();
         initThemeToggle();
+        initLayoutToggle();
     });
 } else {
     window.newsFilters = new NewsFilters();
     initThemeToggle();
+    initLayoutToggle();
 }

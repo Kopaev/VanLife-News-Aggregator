@@ -139,12 +139,17 @@ $last_update_time = $last_update_time ?? date('Y-m-d H:i:s');
 
     <!-- Layout Toggle -->
     <div class="layout-toggle-row">
-        <button type="button" class="layout-toggle-btn active">Макет</button>
+        <button type="button" class="layout-toggle-btn" id="layout-list" data-layout="list" title="Список">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="0" y="1" width="16" height="3" rx="1"/><rect x="0" y="6" width="16" height="3" rx="1"/><rect x="0" y="11" width="16" height="3" rx="1"/></svg>
+        </button>
+        <button type="button" class="layout-toggle-btn active" id="layout-grid" data-layout="grid" title="Сетка">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="0" y="0" width="7" height="7" rx="1"/><rect x="9" y="0" width="7" height="7" rx="1"/><rect x="0" y="9" width="7" height="7" rx="1"/><rect x="9" y="9" width="7" height="7" rx="1"/></svg>
+        </button>
     </div>
 
     <!-- Main Content Grid -->
     <div class="main-content-grid">
-        <main class="news-column" id="news-container">
+        <main class="news-column layout-grid" id="news-container" data-layout="grid">
             <?php if (empty($articles)): ?>
                 <div class="no-results-card">
                     <p>Пока нет опубликованных новостей.</p>
