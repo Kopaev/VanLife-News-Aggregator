@@ -70,15 +70,7 @@ class NewsFetcher
         $savedCount = 0;
         foreach ($rss->channel->item as $item) {
             $googleNewsUrl = (string)$item->link;
-            $originalUrl = $this->urlDecoder->decode($googleNewsUrl);
-
-            if (!$originalUrl) {
-                $this->logger->warning('NewsFetcher', 'Failed to decode URL', [
-                    'source' => $source['name'],
-                    'url' => $googleNewsUrl
-                ]);
-                continue;
-            }
+            $originalUrl = $googleNewsUrl; // FIX: Временно игнорируем декодер
 
             if ($this->articleRepository->isArticleExists($originalUrl)) {
                 continue;
